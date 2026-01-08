@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -48,7 +48,7 @@ def register(request: UserRegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=APIResponse)
 def login(request: UserLoginRequest, db: Session = Depends(get_db)):
-    """Autenticar usuario."""
+    """Autenticar usuario con tokens segmentados."""
     result = AuthService.authenticate_user(db, request.email, request.password)
     
     if not result:
@@ -92,19 +92,52 @@ def login(request: UserLoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=APIResponse)
-def refresh(request=None, db: Session = Depends(get_db)):
-    """Refrescar access token usando refresh token."""
-    # En implementación real, obtener refresh_token de cookie
-    # Por ahora es un placeholder
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Endpoint en desarrollo"
+def refresh(request: Request, db: Session = Depends(get_db)):
+    """Refrescar access token usando refresh token de cookie."""
+    
+    # Obtener refresh token de la cookie
+    refresh_token = request.cookies.get("refresh_token")
+    
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token not found in cookies"
+        )
+    
+    # Verificar token
+    payload = verify_token(refresh_token)
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+    
+    # Obtener ID del usuario
+    try:
+        user_id = int(payload.get("sub"))
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload"
+        )
+    
+    # Crear nuevo access token
+    from app.core.security import create_access_token
+    new_access_token = create_access_token({"sub": str(user_id)})
+    
+    return APIResponse(
+        status="success",
+        data={
+            "access_token": new_access_token,
+            "token_type": "bearer"
+        },
+        timestamp=datetime.utcnow()
     )
 
 
 @router.post("/logout", response_model=APIResponse)
 def logout():
-    """Cerrar sesión."""
+    """Cerrar sesión e invalidar refresh token."""
     response = JSONResponse(
         content=APIResponse(
             status="success",
@@ -117,12 +150,25 @@ def logout():
 
 
 @router.get("/me", response_model=APIResponse)
-def get_current_user(token: str = None, db: Session = Depends(get_db)):
-    """Obtener usuario actual."""
-    if not token:
+def get_current_user(request: Request, db: Session = Depends(get_db)):
+    """Obtener usuario actual autenticado."""
+    
+    # Obtener usuario del token
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No authorization token provided"
+            detail="Authorization header missing"
+        )
+    
+    try:
+        scheme, token = auth_header.split()
+        if scheme.lower() != "bearer":
+            raise ValueError()
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format"
         )
     
     payload = verify_token(token)
