@@ -62,15 +62,31 @@ class TaskService:
         user_id: int,
         status: Optional[str] = None,
         priority: Optional[str] = None,
-        include_deleted: bool = False
+        category_id: Optional[int] = None,
+        category_ids: Optional[List[int]] = None,
+        deadline_from: Optional[str] = None,
+        deadline_to: Optional[str] = None,
+        search: Optional[str] = None,
+        completed: Optional[bool] = None,
+        include_deleted: bool = False,
+        limit: int = 1000,
+        offset: int = 0
     ) -> List[TaskResponse]:
-        """Obtener todas las tareas del usuario."""
+        """Obtener todas las tareas del usuario con filtros avanzados."""
         tasks = TaskRepository.get_tasks_by_user(
             db=db,
             user_id=user_id,
             status=status,
             priority=priority,
-            include_deleted=include_deleted
+            category_id=category_id,
+            category_ids=category_ids,
+            deadline_from=deadline_from,
+            deadline_to=deadline_to,
+            search=search,
+            completed=completed,
+            include_deleted=include_deleted,
+            limit=limit,
+            offset=offset
         )
         return [TaskResponse.from_orm(task) for task in tasks]
 

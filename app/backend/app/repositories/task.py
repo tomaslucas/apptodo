@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from app.models.task import Task, TaskEvent
-from datetime import datetime
+from sqlalchemy import and_, or_, func
+from app.models.task import Task, TaskEvent, TaskCategory, Category
+from datetime import datetime, date
 from typing import Optional, List
 
 
@@ -47,21 +47,70 @@ class TaskRepository:
         user_id: int,
         status: Optional[str] = None,
         priority: Optional[str] = None,
-        include_deleted: bool = False
+        category_id: Optional[int] = None,
+        category_ids: Optional[List[int]] = None,
+        deadline_from: Optional[str] = None,
+        deadline_to: Optional[str] = None,
+        search: Optional[str] = None,
+        completed: Optional[bool] = None,
+        include_deleted: bool = False,
+        limit: int = 1000,
+        offset: int = 0
     ) -> List[Task]:
-        """Obtener todas las tareas del usuario."""
+        """Obtener todas las tareas del usuario con filtros avanzados."""
         query = db.query(Task).filter(Task.user_id == user_id)
         
         if not include_deleted:
             query = query.filter(Task.deleted_at.is_(None))
         
+        # Filtro por estatus
         if status:
             query = query.filter(Task.status == status)
         
+        # Filtro por prioridad
         if priority:
             query = query.filter(Task.priority == priority)
         
-        return query.all()
+        # Filtro por categoría (single)
+        if category_id:
+            query = query.join(TaskCategory).join(Category).filter(
+                TaskCategory.category_id == category_id,
+                Category.user_id == user_id
+            )
+        
+        # Filtro por múltiples categorías (AND)
+        if category_ids:
+            for cat_id in category_ids:
+                query = query.join(TaskCategory, TaskCategory.task_id == Task.id).filter(
+                    TaskCategory.category_id == cat_id
+                )
+        
+        # Filtro por rango de fecha de vencimiento
+        if deadline_from:
+            query = query.filter(Task.deadline >= deadline_from)
+        
+        if deadline_to:
+            query = query.filter(Task.deadline <= deadline_to)
+        
+        # Búsqueda por texto (título o descripción)
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Task.title.ilike(search_term),
+                    Task.description.ilike(search_term)
+                )
+            )
+        
+        # Filtro por completado
+        if completed is not None:
+            if completed:
+                query = query.filter(Task.status == "completada")
+            else:
+                query = query.filter(Task.status != "completada")
+        
+        # Aplicar límite y offset
+        return query.limit(limit).offset(offset).all()
 
     @staticmethod
     def update_task(

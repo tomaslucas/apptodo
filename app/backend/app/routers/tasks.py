@@ -82,17 +82,44 @@ def get_task(
 def list_tasks(
     status: str = None,
     priority: str = None,
+    category_id: int = None,
+    categories: str = None,
+    deadline_from: str = None,
+    deadline_to: str = None,
+    search: str = None,
+    completed: bool = None,
     include_deleted: bool = False,
+    limit: int = 1000,
+    offset: int = 0,
     current_user: UserResponse = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Obtener todas las tareas del usuario con filtros opcionalesivos."""
+    """Obtener todas las tareas del usuario con filtros avanzados."""
+    # Parsear múltiples categorías (comma-separated list)
+    category_ids = None
+    if categories:
+        try:
+            category_ids = [int(c.strip()) for c in categories.split(",")]
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid category IDs format"
+            )
+    
     tasks = TaskService.get_user_tasks(
         db=db,
         user_id=current_user.id,
         status=status,
         priority=priority,
-        include_deleted=include_deleted
+        category_id=category_id,
+        category_ids=category_ids,
+        deadline_from=deadline_from,
+        deadline_to=deadline_to,
+        search=search,
+        completed=completed,
+        include_deleted=include_deleted,
+        limit=limit,
+        offset=offset
     )
     
     return APIResponse(
@@ -101,7 +128,8 @@ def list_tasks(
             "tasks": tasks,
             "pagination": {
                 "total": len(tasks),
-                "limit": 1000
+                "limit": limit,
+                "offset": offset
             }
         },
         timestamp=datetime.utcnow()
