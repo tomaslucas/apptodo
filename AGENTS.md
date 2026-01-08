@@ -38,5 +38,50 @@ bd sync               # Sync with git
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
 
-# Python
-We use UV to operate with python.
+# Python & Package Management
+
+## ⚡ CRITICAL: UV is MANDATORY
+
+This project uses **UV** for ALL Python and dependency management.
+
+**DO NOT use:**
+- ❌ `pip install`
+- ❌ `python -m venv`
+- ❌ Manual `venv` activation
+- ❌ `requirements.txt` for dependency specification
+
+**DO use:**
+- ✅ `uv sync --python 3.12` - Synchronize dependencies
+- ✅ `uv add <package>` - Add new dependency
+- ✅ `pyproject.toml` - Define dependencies
+- ✅ `uv.lock` - Lock exact versions
+
+## Setup
+
+```bash
+# Install UV
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install Python 3.12
+uv python install 3.12
+
+# Sync backend dependencies
+cd app/backend && uv sync --python 3.12
+source .venv/bin/activate
+
+# Sync frontend dependencies (uses Bun, not UV)
+cd app/frontend && bun install
+```
+
+## Files
+
+- `pyproject.toml` - Source of truth for dependencies
+- `uv.lock` - Generated lock file (commit to git)
+- `.python-version` - Specifies Python 3.12 (for UV)
+- `requirements.txt` - Auto-generated backup (do NOT edit manually)
+
+## Reference
+
+- PLAN.md Section 0: Tools and Configuration
+- PLAN.md Section 9: Initialization and Setup
+- SETUP.md: Quick start guide

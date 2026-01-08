@@ -1,13 +1,43 @@
 # Plan: Aplicación de To-Do Multiusuario
 
+## 0. Herramientas y Configuración Requerida
+
+**IMPORTANTE:** Este proyecto está configurado con herramientas específicas. Ver AGENTS.md para detalles.
+
+### Herramientas Obligatorias
+- **UV** - Gestor de Python y dependencias (NO pip, NO venv manuals)
+- **Python 3.12** - Versión específica (gestionada por UV)
+- **Bun** - Gestor de paquetes Node.js para frontend
+- **bd (beads)** - Issue tracking con prefijo `apptodo`
+
+### Inicialización Rápida
+```bash
+# 1. Instalar UV
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. Instalar Python 3.12 
+uv python install 3.12
+
+# 3. Backend: Sincronizar dependencias
+cd app/backend && uv sync --python 3.12
+
+# 4. Frontend: Instalar dependencias
+cd app/frontend && bun install
+```
+
+**MUY IMPORTANTE:** Leer la sección 9 (Inicialización y Setup) para instrucciones detalladas.
+
+---
+
 ## 1. Visión General
 
 Aplicación web de gestión de tareas con autenticación segura, filtros dinámicos, auditoría completa y atajos de teclado para máxima productividad.
 
 **Stack:**
 - **Frontend:** Vue 3 + TypeScript + Bun + Vue Router (en `/app/frontend`)
-- **Backend:** Python 3.12 + FastAPI + SQLite (en `/app/backend`)
+- **Backend:** Python 3.12 + FastAPI + SQLite (en `/app/backend`) - Dependencias con UV + pyproject.toml
 - **Arquitectura:** SPA con rutas, dashboard único con filtros dinámicos, APIs versionadas
+- **Gestor de Tareas:** Beads (bd) con prefijo `apptodo`
 
 ---
 
@@ -476,26 +506,52 @@ Los filtros se aplican **en memoria** en el frontend una vez las tareas están c
 
 ## 9. Inicialización y Setup
 
+### Requisitos Globales
+
+Este proyecto **REQUIERE UV** para la gestión de Python y dependencias. Ver AGENTS.md.
+
+```bash
+# Instalar UV
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Instalar Python 3.12 (UV lo gestiona)
+uv python install 3.12
+```
+
 ### Backend
 
 ```bash
 cd /app/backend
-python3.12 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python -m app.database  # Ejecuta migrations/init.sql
-python -m uvicorn app.main:app --reload --port 8000
+
+# Sincronizar dependencias con UV (crea .venv automáticamente)
+uv sync --python 3.12
+
+# Activar ambiente virtual
+source .venv/bin/activate
+
+# Ejecutar servidor (con hot-reload)
+uvicorn app.main:app --reload --port 8000
 ```
+
+**Nota:** El archivo `pyproject.toml` define todas las dependencias. NO usar `pip install -r requirements.txt` directamente. El archivo `requirements.txt` es solo respaldo y se auto-genera desde `pyproject.toml`.
 
 ### Frontend
 
 ```bash
 cd /app/frontend
+
+# Instalar dependencias (Bun maneja Node)
 bun install
+
+# Dev server (hot-reload)
 bun run dev
 ```
 
-La app estará en `http://localhost:5173` (dev) con API en `http://localhost:8000/api/v1/`.
+La app estará en:
+- **Frontend:** `http://localhost:5173` (dev mode)
+- **Backend API:** `http://localhost:8000`
+- **API Docs:** `http://localhost:8000/docs`
+- **Database:** SQLite en `app/backend/app.db`
 
 ---
 
