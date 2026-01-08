@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import apiClient from '../api/client'
 
 export interface Category {
   id: string
@@ -31,8 +31,8 @@ export const useCategoryStore = defineStore('category', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.get('/api/v1/categories')
-      categories.value = response.data
+      const response = await apiClient.get('/api/v1/categories')
+      categories.value = response.data.data || response.data
       hasLoaded.value = true
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch categories'
@@ -45,9 +45,10 @@ export const useCategoryStore = defineStore('category', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.post('/api/v1/categories', categoryData)
-      categories.value.push(response.data)
-      return response.data
+      const response = await apiClient.post('/api/v1/categories', categoryData)
+      const newCategory = response.data.data || response.data
+      categories.value.push(newCategory)
+      return newCategory
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to create category'
       return null
@@ -60,12 +61,13 @@ export const useCategoryStore = defineStore('category', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.patch(`/api/v1/categories/${categoryId}`, updates)
+      const response = await apiClient.patch(`/api/v1/categories/${categoryId}`, updates)
+      const updatedCategory = response.data.data || response.data
       const index = categories.value.findIndex((c) => c.id === categoryId)
       if (index !== -1) {
-        categories.value[index] = response.data
+        categories.value[index] = updatedCategory
       }
-      return response.data
+      return updatedCategory
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to update category'
       return null
@@ -78,7 +80,7 @@ export const useCategoryStore = defineStore('category', () => {
     isLoading.value = true
     error.value = null
     try {
-      await axios.delete(`/api/v1/categories/${categoryId}`)
+      await apiClient.delete(`/api/v1/categories/${categoryId}`)
       categories.value = categories.value.filter((c) => c.id !== categoryId)
       return true
     } catch (err) {

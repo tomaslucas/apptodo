@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import apiClient from '../api/client'
 
 export interface Task {
   id: string
@@ -54,8 +54,8 @@ export const useTaskStore = defineStore('task', () => {
       if (filters.value.completed !== null) params.append('completed', String(filters.value.completed))
 
       const url = `/api/v1/tasks${params.toString() ? '?' + params.toString() : ''}`
-      const response = await axios.get(url)
-      tasks.value = response.data
+      const response = await apiClient.get(url)
+      tasks.value = response.data.data || response.data
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch tasks'
     } finally {
@@ -67,9 +67,10 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.post('/api/v1/tasks', taskData)
-      tasks.value.push(response.data)
-      return response.data
+      const response = await apiClient.post('/api/v1/tasks', taskData)
+      const newTask = response.data.data || response.data
+      tasks.value.push(newTask)
+      return newTask
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to create task'
       return null
@@ -82,12 +83,13 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.patch(`/api/v1/tasks/${taskId}`, updates)
+      const response = await apiClient.patch(`/api/v1/tasks/${taskId}`, updates)
+      const updatedTask = response.data.data || response.data
       const index = tasks.value.findIndex((t) => t.id === taskId)
       if (index !== -1) {
-        tasks.value[index] = response.data
+        tasks.value[index] = updatedTask
       }
-      return response.data
+      return updatedTask
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to update task'
       return null
@@ -100,7 +102,7 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      await axios.delete(`/api/v1/tasks/${taskId}`)
+      await apiClient.delete(`/api/v1/tasks/${taskId}`)
       tasks.value = tasks.value.filter((t) => t.id !== taskId)
       return true
     } catch (err) {
