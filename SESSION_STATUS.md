@@ -1,7 +1,7 @@
 # AppTodo - Session Status
 
-## Session: Advanced Backend Features
-Date: 2026-01-08 (Extended Session)
+## Session: Frontend Keyboard Shortcuts Implementation
+Date: 2026-01-08 (Continued Session)
 
 ## Achievements
 
@@ -10,8 +10,45 @@ Date: 2026-01-08 (Extended Session)
 - apptodo-33: TASKS-BATCH - Batch operations endpoints
 - apptodo-13: TASKS-RESTORE - Task restore endpoint (already done)
 - apptodo-48: TASK-EVENTS - Event log endpoint
+- apptodo-12: APPTODO-P5-SHORTCUTS-IMPL - Implementar 9 Atajos en Componentes
 
 ## Work Summary
+
+### Current: Keyboard Shortcuts Implementation (apptodo-12)
+
+**Component Updated:** TaskList.vue
+
+**Shortcuts Implemented (9 total):**
+1. `Cmd+K` / `Ctrl+K` - Create new task
+2. `Cmd+/` / `Ctrl+/` - Show available shortcuts
+3. `Cmd+Shift+C` / `Ctrl+Shift+C` - Clear all filters
+4. `Escape` - Close open modal
+5. `Cmd+F` / `Ctrl+F` - Focus search input
+6. `J` - Navigate to next task
+7. `K` - Navigate to previous task
+8. `Enter` - Open/edit focused task
+9. `D` - Delete focused task
+
+**Technical Implementation:**
+- Integrated `shortcutsManager` utility (created in apptodo-57)
+- Added `focusedTaskIndex` ref for keyboard navigation state
+- Implemented visual focus indication with blue border highlight
+- Added smooth scrolling to focused task
+- Enhanced UI store with `getActiveModal()` method for modal close shortcut
+- Platform-aware shortcuts (Cmd for Mac, Ctrl for Windows/Linux)
+
+**Code Quality:**
+- Comprehensive TypeScript types
+- Proper cleanup in onUnmounted lifecycle hook
+- Test file created with 7 test cases for shortcut registration and functionality
+
+**Files Modified:**
+- `app/frontend/src/components/TaskList.vue` - Main implementation
+- `app/frontend/src/stores/ui.ts` - Added getActiveModal() method
+- `app/frontend/.gitignore` - Created missing gitignore
+- `app/frontend/src/components/__tests__/TaskList.shortcuts.test.ts` - Created test suite
+
+---
 
 ### 1. Advanced Task Filtering (apptodo-50)
 **Endpoint:** `GET /api/v1/tasks`
