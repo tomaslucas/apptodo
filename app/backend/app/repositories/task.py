@@ -325,3 +325,16 @@ class TaskEventRepository:
     def get_task_events(db: Session, task_id: int) -> List[TaskEvent]:
         """Obtener todos los eventos de una tarea."""
         return db.query(TaskEvent).filter(TaskEvent.task_id == task_id).all()
+
+    @staticmethod
+    def get_task_events_paginated(
+        db: Session,
+        task_id: int,
+        limit: int = 100,
+        offset: int = 0
+    ) -> tuple[List[TaskEvent], int]:
+        """Obtener eventos de una tarea con paginación."""
+        query = db.query(TaskEvent).filter(TaskEvent.task_id == task_id)
+        total = query.count()
+        events = query.order_by(TaskEvent.created_at.desc()).limit(limit).offset(offset).all()
+        return events, total

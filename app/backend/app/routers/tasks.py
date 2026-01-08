@@ -11,7 +11,9 @@ from app.schemas.task import (
     TaskCategoryRequest,
     BatchTaskRequest,
     BatchUpdateTaskRequest,
-    BatchOperationResponse
+    BatchOperationResponse,
+    TaskEventResponse,
+    TaskEventsListResponse
 )
 from app.schemas.response import APIResponse
 from app.schemas.user import UserResponse
@@ -384,5 +386,46 @@ def batch_update_tasks(
     return APIResponse(
         status="success",
         data=result,
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.get("/{task_id}/events", response_model=APIResponse)
+def get_task_events(
+    task_id: int,
+    limit: int = 100,
+    offset: int = 0,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Obtener historial de eventos (auditoría) de una tarea."""
+    # Verificar que la tarea pertenece al usuario
+    task = TaskService.get_task(db, task_id, current_user.id)
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tarea no encontrada"
+        )
+    
+    # Obtener eventos
+    from app.repositories.task import TaskEventRepository
+    events, total = TaskEventRepository.get_task_events_paginated(
+        db, task_id, limit=limit, offset=offset
+    )
+    
+    # Convertir a respuesta
+    event_responses = [TaskEventResponse.from_orm(event) for event in events]
+    
+    return APIResponse(
+        status="success",
+        data={
+            "task_id": task_id,
+            "events": event_responses,
+            "total": total,
+            "pagination": {
+                "limit": limit,
+                "offset": offset
+            }
+        },
         timestamp=datetime.utcnow()
     )

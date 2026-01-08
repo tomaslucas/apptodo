@@ -93,3 +93,25 @@ class BatchOperationResponse(BaseModel):
     updated: int = Field(..., description="Cantidad de tareas actualizadas")
     total_requested: int = Field(..., description="Cantidad de tareas solicitadas")
     fields_updated: Optional[dict] = None
+
+
+class TaskEventResponse(BaseModel):
+    """Esquema de respuesta para evento de tarea."""
+    id: int
+    task_id: int
+    user_id: int
+    event_type: str
+    old_state: Optional[dict] = None
+    new_state: Optional[dict] = None
+    payload: Optional[dict] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TaskEventsListResponse(BaseModel):
+    """Esquema de respuesta para lista de eventos."""
+    task_id: int
+    events: list[TaskEventResponse]
+    total: int
