@@ -10,6 +10,13 @@
 - **Bun** - Gestor de paquetes Node.js para frontend
 - **bd (beads)** - Issue tracking con prefijo `apptodo`
 
+### Herramientas de Testing
+- **Backend:** pytest (configurado en `pyproject.toml`)
+- **Frontend Unit:** Vitest + Vue Test Utils
+- **E2E:** Playwright (MCP recomendado) o Claude Code con `/chrome` (si disponible y funcional)
+  - **Prioridad:** Si usas Claude Code → prioritizar `/chrome` sobre MCP Playwright
+  - **Fallback:** Si `/chrome` no funciona o no usas Claude Code → usar MCP Playwright
+
 ### Inicialización Rápida
 ```bash
 # 1. Instalar UV
@@ -659,6 +666,55 @@ La app estará en:
 - Mobile app (API versionada + healthchecks)
 - Webhooks (event log permite subscribers)
 - Analytics avanzado (eventos ya indexados)
+
+---
+
+## 12.5. Testing E2E (End-to-End)
+
+### Configuración de E2E Testing
+
+**Framework:** Playwright (instalable con Bun en `/app/frontend`)
+
+**Herramientas según contexto:**
+
+1. **Si usas Claude Code:**
+   - Prioritizar: `/chrome` para ejecución de tests E2E
+   - Ventajas: Interacción directa con navegador, debugging visual en tiempo real
+   - Fallback: Si `/chrome` no funciona → usar MCP Playwright
+
+2. **Si NO usas Claude Code:**
+   - Usar: MCP Playwright (Must-use Model Context Protocol)
+   - Instalación: `bun add -D @playwright/test`
+   - Configuración: `playwright.config.ts`
+
+### Scope de E2E Testing
+
+**Flujos críticos a validar:**
+- Login/Register (autenticación completa)
+- Crear tarea (validación de formulario, guardado)
+- Filtrado de tareas (por status, priority, categoría)
+- Editar/eliminar tareas (operaciones CRUD)
+- Asignar categorías a tareas (M2M relationships)
+- Atajos de teclado (verificación de funcionalidad)
+- Refresh token rotation (sesiones activas)
+
+**Cobertura mínima:** 80% de flujos user-facing
+
+### Comandos
+
+```bash
+# Instalar Playwright
+cd app/frontend && bun add -D @playwright/test
+
+# Ejecutar E2E tests
+bun exec playwright test
+
+# Modo UI (visual debugging)
+bun exec playwright test --ui
+
+# Debug mode (interactivo)
+bun exec playwright test --debug
+```
 
 ---
 
