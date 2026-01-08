@@ -9,7 +9,7 @@ export interface Task {
   status: 'pending' | 'in_progress' | 'completed'
   priority: 'low' | 'medium' | 'high'
   deadline?: string
-  category_id?: string
+  categories?: string[]
   created_at: string
   updated_at: string
 }
