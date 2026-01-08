@@ -7,65 +7,165 @@
       </div>
 
       <form @submit.prevent="submitForm" class="task-form">
-        <div class="form-group">
-          <label for="title">Task Title *</label>
-          <input v-model="formData.title" type="text" id="title" placeholder="Enter task title" required />
+        <!-- Title Field -->
+        <div class="form-group" :class="{ 'has-error': getTitleError && fieldStates.value.title.isTouched }">
+          <label for="title">
+            Task Title
+            <span class="required">*</span>
+          </label>
+          <input
+            v-model="formData.title"
+            type="text"
+            id="title"
+            placeholder="Enter task title"
+            @blur="handleFieldBlur('title')"
+            @change="handleFieldChange('title', formData.title)"
+            :class="{ 'input-error': getTitleError && fieldStates.value.title.isTouched }"
+          />
+          <div v-if="getTitleError && fieldStates.value.title.isTouched" class="field-error">
+            {{ getTitleError }}
+          </div>
+          <div v-if="!getTitleError && formData.title.length > 0" class="field-hint">
+            {{ formData.title.length }} / 255 characters
+          </div>
         </div>
 
-        <div class="form-group">
+        <!-- Description Field -->
+        <div class="form-group" :class="{ 'has-error': getDescriptionError && fieldStates.value.description.isTouched }">
           <label for="description">Description</label>
           <textarea
             v-model="formData.description"
             id="description"
             placeholder="Enter task description (optional)"
             rows="4"
+            @blur="handleFieldBlur('description')"
+            @change="handleFieldChange('description', formData.description)"
+            :class="{ 'input-error': getDescriptionError && fieldStates.value.description.isTouched }"
           ></textarea>
+          <div v-if="getDescriptionError && fieldStates.value.description.isTouched" class="field-error">
+            {{ getDescriptionError }}
+          </div>
+          <div v-if="!getDescriptionError && formData.description.length > 0" class="field-hint">
+            {{ formData.description.length }} / 2000 characters
+          </div>
         </div>
 
+        <!-- Priority & Deadline Row -->
         <div class="form-row">
-          <div class="form-group">
-            <label for="priority">Priority</label>
-            <select v-model="formData.priority" id="priority" name="priority">
+          <!-- Priority Field -->
+          <div class="form-group" :class="{ 'has-error': getPriorityError }">
+            <label for="priority">
+              Priority
+              <span class="required">*</span>
+            </label>
+            <select
+              v-model="formData.priority"
+              id="priority"
+              @blur="handleFieldBlur('priority')"
+              @change="handleFieldChange('priority', formData.priority)"
+              :class="{ 'input-error': getPriorityError }"
+            >
+              <option value="">-- Select Priority --</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
+            <div v-if="getPriorityError && fieldStates.value.priority.isTouched" class="field-error">
+              {{ getPriorityError }}
+            </div>
           </div>
 
-          <div class="form-group">
+          <!-- Deadline Field -->
+          <div class="form-group" :class="{ 'has-error': getDeadlineError && fieldStates.value.deadline.isTouched }">
             <label for="deadline">Deadline</label>
-            <input v-model="formData.deadline" type="date" id="deadline" />
+            <input
+              v-model="formData.deadline"
+              type="date"
+              id="deadline"
+              @blur="handleFieldBlur('deadline')"
+              @change="handleFieldChange('deadline', formData.deadline)"
+              :class="{ 'input-error': getDeadlineError && fieldStates.value.deadline.isTouched }"
+            />
+            <div v-if="getDeadlineError && fieldStates.value.deadline.isTouched" class="field-error">
+              {{ getDeadlineError }}
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="categories">Categories</label>
+        <!-- Categories Field -->
+        <div class="form-group" :class="{ 'has-error': getCategoriesError }">
+          <label>
+            Categories
+            <span class="hint">(optional, max 10)</span>
+          </label>
           <div class="categories-select">
-            <div v-for="category in categoryStore.categories" :key="category.id" class="category-checkbox">
+            <div
+              v-for="category in categoryStore.categories"
+              :key="category.id"
+              class="category-checkbox"
+            >
               <input
                 type="checkbox"
                 :id="`category-${category.id}`"
                 :value="category.id"
                 v-model="formData.categories"
+                @change="handleFieldChange('categories', formData.categories)"
               />
               <label :for="`category-${category.id}`">{{ category.name }}</label>
             </div>
           </div>
+          <div v-if="getCategoriesError && fieldStates.value.categories.isTouched" class="field-error">
+            {{ getCategoriesError }}
+          </div>
+          <div v-if="formData.categories.length > 0" class="field-hint">
+            {{ formData.categories.length }} category(ies) selected
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="status">Status</label>
-          <select v-model="formData.status" id="status">
+        <!-- Status Field -->
+        <div class="form-group" :class="{ 'has-error': getStatusError }">
+          <label for="status">
+            Status
+            <span class="required">*</span>
+          </label>
+          <select
+            v-model="formData.status"
+            id="status"
+            @blur="handleFieldBlur('status')"
+            @change="handleFieldChange('status', formData.status)"
+            :class="{ 'input-error': getStatusError }"
+          >
+            <option value="">-- Select Status --</option>
             <option value="pending">Pending</option>
             <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
+          <div v-if="getStatusError && fieldStates.value.status.isTouched" class="field-error">
+            {{ getStatusError }}
+          </div>
         </div>
 
-        <div v-if="error" class="error-message">{{ error }}</div>
+        <!-- API Error -->
+        <div v-if="apiError" class="error-message alert-error">
+          <strong>Error:</strong> {{ apiError }}
+        </div>
 
+        <!-- Validation Summary -->
+        <div v-if="hasValidationErrors && anyFieldTouched" class="validation-summary">
+          <strong>Please fix the following issues:</strong>
+          <ul>
+            <li v-for="(error, idx) in validationErrorsList" :key="idx">{{ error }}</li>
+          </ul>
+        </div>
+
+        <!-- Form Actions -->
         <div class="form-actions">
-          <button type="submit" class="btn-submit" :disabled="isLoading">
+          <button
+            type="submit"
+            class="btn-submit"
+            :disabled="isLoading || (hasValidationErrors && anyFieldTouched)"
+            :title="hasValidationErrors && anyFieldTouched ? 'Please fix validation errors' : ''"
+          >
             {{ isLoading ? 'Saving...' : 'Save Task' }}
           </button>
           <button type="button" @click="closeModal" class="btn-cancel">Cancel</button>
@@ -76,10 +176,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useTaskStore, type Task } from '../stores/task'
 import { useCategoryStore } from '../stores/category'
 import { useUIStore } from '../stores/ui'
+import { useFormValidation } from '../composables/useFormValidation'
+import { taskValidationRules } from '../utils/formValidation'
 
 const props = defineProps<{
   modalId?: string
@@ -92,15 +194,36 @@ const uiStore = useUIStore()
 const isEditMode = ref(false)
 const currentTaskId = ref<string | null>(null)
 const isLoading = ref(false)
-const error = ref<string | null>(null)
+const apiError = ref<string | null>(null)
 
-const formData = ref({
+const initialFormData = {
   title: '',
   description: '',
   priority: 'medium' as 'low' | 'medium' | 'high',
   deadline: '',
   categories: [] as string[],
   status: 'pending' as 'pending' | 'in_progress' | 'completed',
+}
+
+// Initialize form validation composable
+const {
+  formData,
+  fieldStates,
+  errorMap,
+  isValid,
+  isDirty,
+  errors: validationErrorsList,
+  validateAllFields,
+  handleFieldChange,
+  handleFieldBlur,
+  resetForm: resetValidation,
+  setFormData,
+} = useFormValidation({
+  initialValues: initialFormData,
+  validationRules: taskValidationRules,
+  debounceDelay: 300,
+  validateOnChange: true,
+  validateOnBlur: true,
 })
 
 const isOpen = computed(() => {
@@ -111,6 +234,20 @@ const isOpen = computed(() => {
   return false
 })
 
+// Computed error getters for each field
+const getTitleError = computed(() => errorMap.value.title || null)
+const getDescriptionError = computed(() => errorMap.value.description || null)
+const getPriorityError = computed(() => errorMap.value.priority || null)
+const getDeadlineError = computed(() => errorMap.value.deadline || null)
+const getCategoriesError = computed(() => errorMap.value.categories || null)
+const getStatusError = computed(() => errorMap.value.status || null)
+
+// Check if any field has been touched
+const anyFieldTouched = computed(() => Object.values(fieldStates.value).some((state) => state.isTouched))
+
+// Check if form has validation errors
+const hasValidationErrors = computed(() => Object.keys(errorMap.value).length > 0)
+
 const closeModal = () => {
   if (props.modalId) {
     uiStore.closeModal(props.modalId)
@@ -119,27 +256,29 @@ const closeModal = () => {
 }
 
 const resetForm = () => {
-  formData.value = {
-    title: '',
-    description: '',
-    priority: 'medium',
-    deadline: '',
-    categories: [],
-    status: 'pending',
-  }
+  setFormData(initialFormData)
+  resetValidation()
   isEditMode.value = false
   currentTaskId.value = null
-  error.value = null
+  apiError.value = null
 }
 
 const submitForm = async () => {
-  if (!formData.value.title.trim()) {
-    error.value = 'Task title is required'
+  // Touch all fields for validation display
+  Object.values(fieldStates.value).forEach((state) => {
+    state.isTouched = true
+  })
+
+  // Validate all fields
+  const isFormValid = await validateAllFields()
+
+  if (!isFormValid) {
+    apiError.value = 'Please fix all validation errors before submitting'
     return
   }
 
   isLoading.value = true
-  error.value = null
+  apiError.value = null
 
   try {
     if (isEditMode.value && currentTaskId.value) {
@@ -170,7 +309,7 @@ const submitForm = async () => {
 
     closeModal()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'An error occurred while saving the task'
+    apiError.value = err instanceof Error ? err.message : 'An error occurred while saving the task'
   } finally {
     isLoading.value = false
   }
@@ -183,28 +322,28 @@ watch(
     if (data && data.task) {
       isEditMode.value = true
       currentTaskId.value = data.task.id
-      formData.value = {
+      setFormData({
         title: data.task.title,
         description: data.task.description || '',
         priority: data.task.priority,
         deadline: data.task.deadline || '',
         categories: data.task.categories || [],
         status: data.task.status,
-      }
+      })
     } else if (data && data.taskId) {
       // If only taskId is provided, fetch the task
       const task = taskStore.tasks.find((t) => t.id === data.taskId)
       if (task) {
         isEditMode.value = true
         currentTaskId.value = task.id
-        formData.value = {
+        setFormData({
           title: task.title,
           description: task.description || '',
           priority: task.priority,
           deadline: task.deadline || '',
           categories: task.categories || [],
           status: task.status,
-        }
+        })
       }
     } else {
       resetForm()
@@ -218,6 +357,10 @@ onMounted(async () => {
   if (!categoryStore.hasCategoriesLoaded()) {
     await categoryStore.fetchCategories()
   }
+})
+
+onUnmounted(() => {
+  // Cleanup is handled by composable
 })
 </script>
 
@@ -286,6 +429,17 @@ onMounted(async () => {
 
 .form-group {
   margin-bottom: 1.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.form-group.has-error {
+  background-color: #fff5f5;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-left: -0.75rem;
+  margin-right: -0.75rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
 }
 
 .form-group label {
@@ -296,17 +450,30 @@ onMounted(async () => {
   font-size: 0.95rem;
 }
 
+.required {
+  color: #e53e3e;
+  margin-left: 0.25rem;
+}
+
+.hint {
+  color: #999;
+  font-size: 0.85rem;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
 .form-group input[type='text'],
 .form-group input[type='date'],
 .form-group textarea,
 .form-group select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 2px solid #ddd;
   border-radius: 4px;
   font-size: 0.95rem;
   font-family: inherit;
   box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input[type='text']:focus,
@@ -316,6 +483,20 @@ onMounted(async () => {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input.input-error,
+.form-group textarea.input-error,
+.form-group select.input-error {
+  border-color: #e53e3e;
+  background-color: #fef5f5;
+}
+
+.form-group input.input-error:focus,
+.form-group textarea.input-error:focus,
+.form-group select.input-error:focus {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
 }
 
 .form-group textarea {
@@ -349,6 +530,7 @@ onMounted(async () => {
   cursor: pointer;
   width: 18px;
   height: 18px;
+  accent-color: #667eea;
 }
 
 .category-checkbox label {
@@ -358,13 +540,74 @@ onMounted(async () => {
   font-size: 0.9rem;
 }
 
+/* Field validation feedback */
+.field-error {
+  color: #e53e3e;
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+.field-error::before {
+  content: '⚠';
+  font-weight: bold;
+}
+
+.field-hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* API Error */
 .error-message {
   background-color: #ffebee;
   color: #c62828;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 4px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-size: 0.9rem;
+  border-left: 4px solid #c62828;
+}
+
+.error-message.alert-error {
+  background-color: #fff5f5;
+  color: #e53e3e;
+  border-color: #e53e3e;
+}
+
+/* Validation Summary */
+.validation-summary {
+  background-color: #fef5f5;
+  color: #e53e3e;
+  border: 1px solid #fc8181;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.validation-summary strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.validation-summary ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.validation-summary li {
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
 }
 
 .form-actions {
@@ -395,6 +638,7 @@ onMounted(async () => {
 .btn-submit:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .btn-cancel {
@@ -412,6 +656,18 @@ onMounted(async () => {
 .btn-cancel:hover {
   background-color: #efefef;
   border-color: #999;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 600px) {
