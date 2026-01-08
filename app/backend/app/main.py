@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from app.core.config import settings
 from app.core.database import init_db, get_engine
-from app.routers import auth, tasks
+from app.routers import auth, tasks, categories
 
 # Inicializar base de datos
 init_db()
@@ -26,6 +26,7 @@ app.add_middleware(
 # Incluir routers
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(categories.router)
 
 
 @app.get("/health")
