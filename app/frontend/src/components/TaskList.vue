@@ -26,7 +26,12 @@
       </button>
     </div>
 
-    <div v-else class="tasks-grid">
+    <Transition-group
+      v-else
+      name="slide-up"
+      tag="div"
+      class="tasks-grid"
+    >
       <TaskItem
         v-for="(task, index) in taskStore.filteredTasks"
         :key="task.id"
@@ -37,7 +42,7 @@
         @delete="onTaskDeleted"
         @updateStatus="onTaskStatusUpdated"
       />
-    </div>
+    </Transition-group>
   </div>
 </template>
 

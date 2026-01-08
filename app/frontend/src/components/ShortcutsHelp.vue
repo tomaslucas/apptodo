@@ -1,6 +1,8 @@
 <template>
-  <div v-if="isOpen" class="shortcuts-help-overlay" @click="closeModal">
-    <div class="shortcuts-help-modal" @click.stop>
+  <Transition name="fade">
+    <div v-if="isOpen" class="shortcuts-help-overlay" @click="closeModal">
+      <Transition name="scale" appear>
+        <div class="shortcuts-help-modal" @click.stop>
       <div class="modal-header">
         <h2>Keyboard Shortcuts</h2>
         <button class="btn-close" @click="closeModal" title="Close (Esc)">×</button>
@@ -36,8 +38,10 @@
       <div class="modal-footer">
         <button class="btn-close-modal" @click="closeModal">Close</button>
       </div>
+        </div>
+      </Transition>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
