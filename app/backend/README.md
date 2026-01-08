@@ -6,17 +6,17 @@ Backend FastAPI + SQLite para la aplicación de gestión de tareas.
 
 ### Prerequisites
 
-- Python 3.12+
+- UV (https://docs.astral.sh/uv/)
+- Python 3.12 (managed by UV)
 
 ### Installation
 
 ```bash
-# Crear ambiente virtual
-python3.12 -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+# Instalar dependencias con UV (crea .venv automáticamente)
+uv sync --python 3.12
 
-# Instalar dependencias
-pip install -r requirements.txt
+# Activar ambiente virtual
+source .venv/bin/activate
 
 # Configurar variables de entorno
 cp .env.example .env
