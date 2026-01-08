@@ -14,6 +14,11 @@
             <router-link to="/dashboard">Dashboard</router-link>
           </li>
           <li v-if="isAuthenticated">
+            <button @click="toggleShortcutsHelp" class="shortcuts-btn" title="Show shortcuts (Cmd+?)">
+              ⌨️
+            </button>
+          </li>
+          <li v-if="isAuthenticated">
             <button @click="logout" class="logout-btn">Logout</button>
           </li>
         </ul>
@@ -22,16 +27,22 @@
     <main class="main-content">
       <router-view />
     </main>
+    <ShortcutsHelp />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { useUIStore } from './stores/ui'
+import { useShortcuts } from './utils/shortcutsManager'
+import ShortcutsHelp from './components/ShortcutsHelp.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const uiStore = useUIStore()
+const { register, unregister, start, stop } = useShortcuts()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 
@@ -39,6 +50,45 @@ const logout = () => {
   authStore.logout()
   router.push('/login')
 }
+
+const toggleShortcutsHelp = () => {
+  if (uiStore.modals['shortcuts-help']?.isOpen) {
+    uiStore.closeModal('shortcuts-help')
+  } else {
+    uiStore.openModal('shortcuts-help', 'Keyboard Shortcuts', {})
+  }
+}
+
+onMounted(() => {
+  // Register the shortcuts help modal
+  uiStore.registerModal('shortcuts-help', 'custom', false, 'Keyboard Shortcuts', {})
+
+  // Register shortcut to open shortcuts help: Cmd+? or Ctrl+?
+  register({
+    id: 'app-show-help',
+    keys: ['Meta', '/'],
+    description: 'Show keyboard shortcuts',
+    handler: async () => toggleShortcutsHelp(),
+    enabled: true,
+  })
+
+  // Fallback for Ctrl+? on non-Mac
+  register({
+    id: 'app-show-help-ctrl',
+    keys: ['Control', '/'],
+    description: 'Show keyboard shortcuts (Windows/Linux)',
+    handler: async () => toggleShortcutsHelp(),
+    enabled: true,
+  })
+
+  start()
+})
+
+onUnmounted(() => {
+  unregister('app-show-help')
+  unregister('app-show-help-ctrl')
+  stop()
+})
 </script>
 
 <style scoped>
@@ -80,6 +130,21 @@ const logout = () => {
 
 .nav-menu a:hover {
   color: #4CAF50;
+}
+
+.shortcuts-btn {
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.3s;
+}
+
+.shortcuts-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .logout-btn {
