@@ -74,3 +74,22 @@ class TaskDetailResponse(BaseModel):
 class TaskCategoryRequest(BaseModel):
     """Esquema para agregar/remover categoría a/de tarea."""
     category_id: int = Field(..., gt=0, description="ID de la categoría")
+
+
+class BatchTaskRequest(BaseModel):
+    """Esquema para operaciones en batch."""
+    task_ids: list[int] = Field(..., min_items=1, description="Lista de IDs de tareas")
+
+
+class BatchUpdateTaskRequest(BaseModel):
+    """Esquema para actualizar múltiples tareas."""
+    task_ids: list[int] = Field(..., min_items=1, description="Lista de IDs de tareas")
+    status: Optional[StatusEnum] = None
+    priority: Optional[PriorityEnum] = None
+
+
+class BatchOperationResponse(BaseModel):
+    """Esquema de respuesta para operaciones en batch."""
+    updated: int = Field(..., description="Cantidad de tareas actualizadas")
+    total_requested: int = Field(..., description="Cantidad de tareas solicitadas")
+    fields_updated: Optional[dict] = None

@@ -249,3 +249,95 @@ class TaskService:
             )
         
         return success
+
+    @staticmethod
+    def batch_complete_tasks(db: Session, task_ids: List[int], user_id: int) -> dict:
+        """Marcar múltiples tareas como completadas."""
+        updated_count = TaskRepository.batch_complete_tasks(db, task_ids, user_id)
+        
+        # Registrar evento para cada tarea
+        for task_id in task_ids:
+            TaskEventRepository.create_event(
+                db=db,
+                task_id=task_id,
+                user_id=user_id,
+                event_type="task_completed"
+            )
+        
+        return {
+            "updated": updated_count,
+            "total_requested": len(task_ids)
+        }
+
+    @staticmethod
+    def batch_delete_tasks(db: Session, task_ids: List[int], user_id: int) -> dict:
+        """Soft delete de múltiples tareas."""
+        updated_count = TaskRepository.batch_delete_tasks(db, task_ids, user_id)
+        
+        # Registrar evento para cada tarea
+        for task_id in task_ids:
+            TaskEventRepository.create_event(
+                db=db,
+                task_id=task_id,
+                user_id=user_id,
+                event_type="task_deleted"
+            )
+        
+        return {
+            "updated": updated_count,
+            "total_requested": len(task_ids)
+        }
+
+    @staticmethod
+    def batch_restore_tasks(db: Session, task_ids: List[int], user_id: int) -> dict:
+        """Restaurar múltiples tareas eliminadas."""
+        updated_count = TaskRepository.batch_restore_tasks(db, task_ids, user_id)
+        
+        # Registrar evento para cada tarea
+        for task_id in task_ids:
+            TaskEventRepository.create_event(
+                db=db,
+                task_id=task_id,
+                user_id=user_id,
+                event_type="task_restored"
+            )
+        
+        return {
+            "updated": updated_count,
+            "total_requested": len(task_ids)
+        }
+
+    @staticmethod
+    def batch_update_tasks(
+        db: Session,
+        task_ids: List[int],
+        user_id: int,
+        status: Optional[str] = None,
+        priority: Optional[str] = None
+    ) -> dict:
+        """Actualizar múltiples tareas."""
+        update_kwargs = {}
+        if status:
+            update_kwargs["status"] = status
+        if priority:
+            update_kwargs["priority"] = priority
+        
+        updated_count = TaskRepository.batch_update_tasks(
+            db, task_ids, user_id, **update_kwargs
+        )
+        
+        # Registrar evento para cada tarea
+        for task_id in task_ids:
+            TaskEventRepository.create_event(
+                db=db,
+                task_id=task_id,
+                user_id=user_id,
+                event_type="task_updated",
+                payload=update_kwargs
+            )
+        
+        return {
+            "updated": updated_count,
+            "total_requested": len(task_ids),
+            "fields_updated": update_kwargs
+        }

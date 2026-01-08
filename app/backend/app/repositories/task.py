@@ -202,6 +202,98 @@ class TaskRepository:
         return task
 
 
+    @staticmethod
+    def batch_complete_tasks(db: Session, task_ids: List[int], user_id: int) -> int:
+        """Marcar múltiples tareas como completadas."""
+        updated = db.query(Task).filter(
+            and_(
+                Task.id.in_(task_ids),
+                Task.user_id == user_id,
+                Task.deleted_at.is_(None)
+            )
+        ).update(
+            {
+                Task.status: "completada",
+                Task.completed_at: datetime.utcnow(),
+                Task.version: Task.version + 1,
+                Task.updated_at: datetime.utcnow()
+            },
+            synchronize_session=False
+        )
+        db.commit()
+        return updated
+
+    @staticmethod
+    def batch_delete_tasks(db: Session, task_ids: List[int], user_id: int) -> int:
+        """Soft delete de múltiples tareas."""
+        updated = db.query(Task).filter(
+            and_(
+                Task.id.in_(task_ids),
+                Task.user_id == user_id,
+                Task.deleted_at.is_(None)
+            )
+        ).update(
+            {
+                Task.deleted_at: datetime.utcnow(),
+                Task.version: Task.version + 1,
+                Task.updated_at: datetime.utcnow()
+            },
+            synchronize_session=False
+        )
+        db.commit()
+        return updated
+
+    @staticmethod
+    def batch_restore_tasks(db: Session, task_ids: List[int], user_id: int) -> int:
+        """Restaurar múltiples tareas eliminadas."""
+        updated = db.query(Task).filter(
+            and_(
+                Task.id.in_(task_ids),
+                Task.user_id == user_id,
+                Task.deleted_at.isnot(None)
+            )
+        ).update(
+            {
+                Task.deleted_at: None,
+                Task.version: Task.version + 1,
+                Task.updated_at: datetime.utcnow()
+            },
+            synchronize_session=False
+        )
+        db.commit()
+        return updated
+
+    @staticmethod
+    def batch_update_tasks(
+        db: Session,
+        task_ids: List[int],
+        user_id: int,
+        **update_fields
+    ) -> int:
+        """Actualizar múltiples tareas."""
+        update_data = {}
+        for key, value in update_fields.items():
+            if value is not None and hasattr(Task, key):
+                update_data[key] = value
+        
+        if not update_data:
+            return 0
+        
+        # Agregar timestamp de actualización
+        update_data[Task.version] = Task.version + 1
+        update_data[Task.updated_at] = datetime.utcnow()
+        
+        updated = db.query(Task).filter(
+            and_(
+                Task.id.in_(task_ids),
+                Task.user_id == user_id,
+                Task.deleted_at.is_(None)
+            )
+        ).update(update_data, synchronize_session=False)
+        db.commit()
+        return updated
+
+
 class TaskEventRepository:
     """Repositorio para eventos de auditoría de tareas."""
 

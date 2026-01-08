@@ -8,7 +8,10 @@ from app.schemas.task import (
     TaskUpdateRequest,
     TaskResponse,
     TaskListResponse,
-    TaskCategoryRequest
+    TaskCategoryRequest,
+    BatchTaskRequest,
+    BatchUpdateTaskRequest,
+    BatchOperationResponse
 )
 from app.schemas.response import APIResponse
 from app.schemas.user import UserResponse
@@ -299,5 +302,87 @@ def remove_category_from_task(
     return APIResponse(
         status="success",
         data={"message": "Categoría removida de tarea"},
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.post("/batch/complete", response_model=APIResponse)
+def batch_complete_tasks(
+    request: BatchTaskRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Completar múltiples tareas."""
+    result = TaskService.batch_complete_tasks(
+        db=db,
+        task_ids=request.task_ids,
+        user_id=current_user.id
+    )
+    
+    return APIResponse(
+        status="success",
+        data=result,
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.post("/batch/delete", response_model=APIResponse)
+def batch_delete_tasks(
+    request: BatchTaskRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Eliminar múltiples tareas (soft delete)."""
+    result = TaskService.batch_delete_tasks(
+        db=db,
+        task_ids=request.task_ids,
+        user_id=current_user.id
+    )
+    
+    return APIResponse(
+        status="success",
+        data=result,
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.post("/batch/restore", response_model=APIResponse)
+def batch_restore_tasks(
+    request: BatchTaskRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Restaurar múltiples tareas eliminadas."""
+    result = TaskService.batch_restore_tasks(
+        db=db,
+        task_ids=request.task_ids,
+        user_id=current_user.id
+    )
+    
+    return APIResponse(
+        status="success",
+        data=result,
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.patch("/batch/update", response_model=APIResponse)
+def batch_update_tasks(
+    request: BatchUpdateTaskRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Actualizar múltiples tareas."""
+    result = TaskService.batch_update_tasks(
+        db=db,
+        task_ids=request.task_ids,
+        user_id=current_user.id,
+        status=request.status,
+        priority=request.priority
+    )
+    
+    return APIResponse(
+        status="success",
+        data=result,
         timestamp=datetime.utcnow()
     )
