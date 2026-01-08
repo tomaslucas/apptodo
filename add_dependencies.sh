@@ -40,7 +40,9 @@ bd dep add test-beads-k6u --depends-on test-beads-1i6  # P3-DASHBOARD-STRUCTURE 
 
 # FASE 4
 bd dep add test-beads-vaf --depends-on test-beads-k6u  # P4-TASK-STORE depends on P3-DASHBOARD-STRUCTURE
-bd dep add test-beads-144 --depends-on test-beads-vaf  # P4-UI-STORE depends on P4-TASK-STORE
+# NOTE: P4-CATEGORY-STORE is NEW and will be created with correct bead ID
+# bd dep add test-beads-CAT --depends-on test-beads-vaf  # P4-CATEGORY-STORE depends on P4-TASK-STORE (UPDATE WITH ACTUAL ID)
+# bd dep add test-beads-144 --depends-on test-beads-CAT  # P4-UI-STORE depends on P4-CATEGORY-STORE (UPDATE WITH ACTUAL ID)
 bd dep add test-beads-7gn --depends-on test-beads-144  # P4-TASK-ITEM depends on P4-UI-STORE
 bd dep add test-beads-571 --depends-on test-beads-7gn  # P4-TASK-FORM depends on P4-TASK-ITEM
 bd dep add test-beads-i6l --depends-on test-beads-571  # P4-FILTER-BAR depends on P4-TASK-FORM

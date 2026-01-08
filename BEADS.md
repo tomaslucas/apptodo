@@ -42,8 +42,8 @@ Crear estructura de directorios `/app/backend` con:
 ## APPTODO-P1-DB-INIT - Inicialización de Base de Datos (Schema + Índices)
 
 Crear migrations con alembic:
-- Tablas: users, tasks, refresh_tokens
-- Índices: idx_users_email, idx_tasks_user_id, idx_tasks_status, idx_tasks_priority, idx_tasks_deadline, idx_tasks_user_status, idx_refresh_tokens_user_id, idx_refresh_tokens_expires_at
+- Tablas: users, tasks, refresh_tokens, idempotency_keys (MOVED from P2 to enable P1 task idempotency)
+- Índices: idx_users_email, idx_tasks_user_id, idx_tasks_status, idx_tasks_priority, idx_tasks_deadline, idx_tasks_user_status, idx_refresh_tokens_user_id, idx_refresh_tokens_expires_at, idx_idempotency_keys_user_id, idx_idempotency_keys_expires_at
 - Script idempotente: `python -m app.database` ejecuta migrations
 - Seed data: test user con email/pass para testing manual
 
@@ -100,15 +100,16 @@ Implementar login con tokens segmentados:
 
 ---
 
-## APPTODO-P1-AUTH-REFRESH - Endpoint: POST /api/v1/auth/refresh
+## APPTODO-P1-AUTH-REFRESH - Endpoint: POST /api/v1/auth/refresh + Race Condition Handling
 
-Implementar refresh token automático:
+Implementar refresh token automático con manejo de race conditions:
 - Recibe cookie con refresh_token
 - Validaciones: token existe, no expirado, no revocado
 - Genera nuevo access token
 - Respuesta: {status: "success", data: {access_token}}
 - Refresh token NO rotado (sigue siendo same)
 - Rate limiting: 10 refrescos/min por usuario
+- **IMPORTANT:** Design for concurrent requests (multiple 401s simultaneously); document queue/lock strategy in implementation
 
 **Depends on:** APPTODO-P1-AUTH-LOGIN
 
@@ -129,7 +130,7 @@ Implementar logout seguro:
 - Clear cookie: refresh_token=; Max-Age=0
 - Respuesta: {status: "success", data: {}}
 
-**Depends on:** APPTODO-P1-AUTH-REFRESH
+**Depends on:** APPTODO-P1-AUTH-LOGIN
 
 **Acceptance Criteria:**
 - ✅ Sin auth → 401
@@ -148,7 +149,7 @@ Implementar endpoint para obtener usuario actual:
 - Respuesta: {status: "success", data: {user: {id, username, email, created_at}}}
 - Si token stale (user deleted) → 401
 
-**Depends on:** APPTODO-P1-AUTH-LOGOUT
+**Depends on:** APPTODO-P1-AUTH-LOGIN
 
 **Acceptance Criteria:**
 - ✅ Con token válido → user data
@@ -409,6 +410,7 @@ Implementar operaciones en batch:
 - POST /api/v1/tasks/batch/priority: cambiar prioridad a múltiples
 - POST /api/v1/tasks/batch/category: asignar categoría a múltiples
 - Todos: require auth + Idempotency-Key, validar ownership, atomic transaction, rate limit 20/min
+- **MAX SIZE:** Máximo 500 items por request (prevent DB lock, memory issues)
 - Response: {status: "success", data: {updated_count: N}}
 
 **Depends on:** APPTODO-P2-TASKS-FILTERS-DB
@@ -521,13 +523,15 @@ Crear stores/authStore.ts:
 
 ---
 
-## APPTODO-P3-API-INTERCEPTOR - API Client: Axios + Interceptor
+## APPTODO-P3-API-INTERCEPTOR - API Client: Axios + Interceptor + Environment Config
 
-Crear api/client.ts (axios instance):
-- baseURL: http://localhost:8000/api/v1/
+Crear api/client.ts (axios instance) con soporte multi-environment:
+- baseURL: Configurable por environment (dev: localhost:8000, staging: ..., prod: ...)
+  - Load from import.meta.env.VITE_API_BASE_URL con fallback a localhost:8000
 - Request interceptor: agregar Authorization header, Idempotency-Key (uuid4 para mutators)
-- Response interceptor: 401 + auto-refresh, error mapping, logging
+- Response interceptor: 401 + auto-refresh con race condition handling (queue concurrent 401s), error mapping, logging
 - ErrorClass: AppError(status, message, details)
+- **Race Condition Handling:** If multiple requests get 401 simultaneously, only one should refresh; others wait for result
 
 **Depends on:** APPTODO-P3-AUTH-STORE
 
@@ -596,6 +600,20 @@ Crear stores/taskStore.ts:
 
 **Depends on:** APPTODO-P3-DASHBOARD-STRUCTURE
 
+---
+
+## APPTODO-P4-CATEGORY-STORE - Pinia Store: CategoryStore (NEW)
+
+Crear stores/categoryStore.ts (complementa TaskStore):
+- State: categories, isLoading, error
+- Actions: fetchCategories, createCategory, updateCategory, deleteCategory
+- Computed: categoriesById (for quick lookup)
+- Getters: getCategory, hasCategoriesLoaded
+- Purpose: Provide categories for TaskForm multi-select, FilterBar selector, TaskItem badges
+- **Note:** Must load categories early (in dashboard mount) for UI responsiveness
+
+**Depends on:** APPTODO-P4-TASK-STORE
+
 **Acceptance Criteria:**
 - ✅ fetchTasks obtiene de API
 - ✅ CRUD actions funcionan
@@ -613,7 +631,7 @@ Crear stores/uiStore.ts:
 - Getters: isTaskSelected, selectionCount, hasSelection, hasActiveModal
 - Separación: UIStore = UI state (no domain logic)
 
-**Depends on:** APPTODO-P4-TASK-STORE
+**Depends on:** APPTODO-P4-CATEGORY-STORE
 
 **Acceptance Criteria:**
 - ✅ Selection funciona
@@ -953,13 +971,17 @@ Implementar tests con Vitest + Vue Test Utils:
 
 ---
 
-## APPTODO-P6-E2E-TESTS - Tests: E2E
+## APPTODO-P6-E2E-TESTS - Tests: E2E + Automated Accessibility
 
-Implementar E2E tests con Cypress/Playwright:
+Implementar E2E tests con Cypress/Playwright + automated a11y testing:
 - Scenarios: Auth (register/login/logout), CRUD, Filters, Batch, Categories, Shortcuts, Responsive
 - Setup: servers running, fresh DB, seeding
 - Assertions: visibility, URL, data, network
 - Screenshots on failure
+- **NEW:** Integrate axe-core for automated accessibility testing in each E2E test
+  - Run axe scans on critical pages (login, dashboard, task form, filters)
+  - Fail test if WCAG AA violations found
+  - Document known issues if any
 
 **Depends on:** APPTODO-P6-FRONTEND-TESTS
 
@@ -967,6 +989,7 @@ Implementar E2E tests con Cypress/Playwright:
 - ✅ All E2E scenarios pass
 - ✅ Tests <5min execution
 - ✅ No flaky tests
+- ✅ Automated a11y testing integrated (Axe Core)
 
 ---
 

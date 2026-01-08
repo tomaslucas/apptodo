@@ -2,22 +2,26 @@
 
 ## Overview
 
-El proyecto AppTodo está estructurado en **58 beads** (tareas) organizados en **6 fases de desarrollo** con una cadena clara de dependencias. Esta guía explica la estructura completa.
+El proyecto AppTodo está estructurado en **59 beads** (tareas) organizados en **6 fases de desarrollo** con una cadena clara de dependencias. Esta guía explica la estructura completa.
 
 ---
 
 ## Structure Summary
 
-### Total: 58 Beads across 6 Phases
+### Total: 59 Beads across 6 Phases (UPDATED)
 
 | Phase | Name | Tasks | Purpose |
 |-------|------|-------|---------|
-| 1 | Backend Base | 18 | Setup, DB, Auth (register/login/refresh/logout/me), CRUD tasks, Testing |
+| 1 | Backend Base | 18 | Setup, DB*, Auth (register/login/refresh/logout/me), CRUD tasks, Testing |
 | 2 | Backend Advanced | 7 | Categories, Filters, Batch ops, Event log |
 | 3 | Frontend Base | 6 | Vue setup, Router, Auth store, API client, Login, Dashboard |
-| 4 | Frontend Features | 8 | Task store, UI store, Components, API integration |
+| 4 | Frontend Features | 9 | Task store, Category store (NEW), UI store, Components, API integration |
 | 5 | Shortcuts | 3 | Manager, 9 shortcuts implementation, Help modal |
 | 6 | Polish | 12 | Styling, Animations, Validations, Loading, Accessibility, Performance, Tests, Docs, Build |
+
+**Notes:**
+- *DB-INIT now includes idempotency_keys table (moved from Phase 2 for P1 task safety)
+- Category store (P4) is NEW and manages categories for TaskForm/FilterBar
 
 ---
 
@@ -108,6 +112,8 @@ P3-DASHBOARD-STRUCTURE
 
 ```
 P4-TASK-STORE
+  ↓
+P4-CATEGORY-STORE (NEW - manages categories for forms/filters)
   ↓
 P4-UI-STORE
   ↓
