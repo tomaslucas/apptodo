@@ -1,14 +1,14 @@
 # Agent Instructions
 
-This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
+This project uses **bd** (beads) for issue tracking with prefix **at** (apptodo). Run `bd onboard` to get started.
 
 ## Quick Reference
 
 ```bash
 bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id>         # Complete work
+bd show at-<id>       # View issue details (e.g., at-1, at-2)
+bd update at-<id> --status in_progress  # Claim work
+bd close at-<id>      # Complete work
 bd sync               # Sync with git
 ```
 
@@ -38,3 +38,5 @@ bd sync               # Sync with git
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
 
+# Python
+We use UV to operate with python.
