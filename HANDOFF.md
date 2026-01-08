@@ -65,17 +65,44 @@ All 49 dependencies established (linear progression):
 
 ---
 
+## Critical Review Summary
+
+After creating initial 58 beads, a comprehensive review identified 4 critical structural issues and 6 major improvements. **All have been fixed in BEADS.md**:
+
+### Critical Fixes Applied ✅
+
+1. **AUTH-LOGOUT dependency** - Now depends on AUTH-LOGIN (was AUTH-REFRESH)
+2. **AUTH-ME dependency** - Now depends on AUTH-LOGIN (was AUTH-LOGOUT)
+3. **Idempotency table placement** - Moved to P1-DB-INIT (was P2-DB-CATEGORIES)
+4. **Category store** - NEW: P4-CATEGORY-STORE added for proper category management
+
+### Improvements Added
+
+- AUTH-REFRESH: Explicit race condition handling documented
+- P3-API-INTERCEPTOR: Environment config support (VITE_API_BASE_URL)
+- P2-TASKS-BATCH: Max size limit (500 items) specified
+- P6-E2E-TESTS: Automated accessibility testing with Axe Core required
+- Documentation: Created BEADS_REVIEW.md with 20-point analysis
+- Clarity: Documented parallel development opportunities
+
+**Result:** Optimal bead structure with 59 beads (1 new) ready for implementation.
+
+See BEADS_REVIEW.md for exhaustive analysis.
+
+---
+
 ## Current State
 
-### Beads Database
+### Beads Database (To be updated)
 
 ```
-Total Issues:    58
-├─ Open:         58
-├─ In Progress:  0
-├─ Blocked:      50
-├─ Closed:       0
-└─ Ready:        8
+Current: 58 beads (old structure)
+Target:  59 beads (optimized structure with fixes)
+         - Ready: 8
+         - Blocked: 51
+         - Total: 59
+
+Action needed: Delete and re-import BEADS.md to apply all fixes + add P4-CATEGORY-STORE
 ```
 
 ### Ready to Start
@@ -150,10 +177,11 @@ Each bead contains:
 
 ### New Files
 
-1. **BEADS.md** (408 lines)
+1. **BEADS.md** (457 lines)
    - Machine-readable format for `bd create --file`
-   - 58 beads in markdown
+   - 59 beads in markdown (1 new: P4-CATEGORY-STORE)
    - All descriptions, dependencies, criteria
+   - **OPTIMIZED:** Critical fixes applied (see "Critical Review" below)
 
 2. **BEADS_STRUCTURE.md** (1000+ lines)
    - Expanded version with ultra-detailed comments
@@ -161,27 +189,40 @@ Each bead contains:
    - Technical rationale for every decision
    - Future-proofing notes
 
-3. **BEADS_GUIDE.md** (413 lines)
+3. **BEADS_GUIDE.md** (427 lines)
    - Developer guide to the bead system
-   - Dependency chain diagrams
+   - Dependency chain diagrams (updated: 59 beads)
    - File structure that will result
    - Quality gates and metrics
    - Development tips
 
 4. **add_dependencies.sh** (executable)
    - Script to set up all bead dependencies
-   - Used to create 49 dependency relationships
+   - Used to create 49+ dependency relationships
    - Documented for future reference
+   - Prepared for P4-CATEGORY-STORE addition
 
-5. **HANDOFF.md** (this file)
+5. **BEADS_REVIEW.md** (NEW - 614 lines)
+   - CRITICAL REVIEW document
+   - 20-point exhaustive analysis
+   - Issues found and fixes applied
+   - Architectural improvements documented
+   - Detailed summary tables and validation checklist
+
+6. **HANDOFF.md** (this file - UPDATED)
    - Session completion summary
    - Current state explanation
    - Next steps guidance
+   - Reflects critical review findings
 
 ### Modified Files
 
-- **Git commits** (2 commits, properly formatted)
-- **bd database** (58 beads created, 49 dependencies set)
+- **Git commits** (4 commits total, properly formatted)
+  - Comprehensive bead structure (58 beads)
+  - Beads guide documentation
+  - Session handoff document
+  - Critical review & optimization (59 beads)
+- **bd database** (ready for 59 beads + dependencies)
 
 ---
 
