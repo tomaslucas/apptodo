@@ -69,3 +69,8 @@ class TaskDetailResponse(BaseModel):
     """Esquema de respuesta detallada de tarea."""
     task: TaskResponse
     events: Optional[list] = None
+
+
+class TaskCategoryRequest(BaseModel):
+    """Esquema para agregar/remover categoría a/de tarea."""
+    category_id: int = Field(..., gt=0, description="ID de la categoría")

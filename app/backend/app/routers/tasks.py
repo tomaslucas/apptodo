@@ -7,7 +7,8 @@ from app.schemas.task import (
     TaskCreateRequest,
     TaskUpdateRequest,
     TaskResponse,
-    TaskListResponse
+    TaskListResponse,
+    TaskCategoryRequest
 )
 from app.schemas.response import APIResponse
 from app.schemas.user import UserResponse
@@ -214,5 +215,61 @@ def complete_task(
     return APIResponse(
         status="success",
         data={"task": task},
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.post("/{task_id}/categories", response_model=APIResponse, status_code=status.HTTP_201_CREATED)
+def add_category_to_task(
+    task_id: int,
+    request: TaskCategoryRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Agregar categoría a tarea."""
+    success = TaskService.add_category_to_task(
+        db=db,
+        task_id=task_id,
+        user_id=current_user.id,
+        category_id=request.category_id
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tarea o categoría no encontrada"
+        )
+    
+    return APIResponse(
+        status="success",
+        data={"message": "Categoría agregada a tarea"},
+        timestamp=datetime.utcnow()
+    )
+
+
+@router.delete("/{task_id}/categories/{category_id}", response_model=APIResponse)
+def remove_category_from_task(
+    task_id: int,
+    category_id: int,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Remover categoría de tarea."""
+    success = TaskService.remove_category_from_task(
+        db=db,
+        task_id=task_id,
+        user_id=current_user.id,
+        category_id=category_id
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tarea o categoría no encontrada"
+        )
+    
+    return APIResponse(
+        status="success",
+        data={"message": "Categoría removida de tarea"},
         timestamp=datetime.utcnow()
     )

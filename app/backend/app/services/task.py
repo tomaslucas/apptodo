@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.repositories.task import TaskRepository, TaskEventRepository
+from app.repositories.category import CategoryRepository, TaskCategoryRepository
 from app.schemas.task import TaskResponse
 from typing import Optional, List
 
@@ -182,3 +183,53 @@ class TaskService:
             )
             return TaskResponse.from_orm(task)
         return None
+
+    @staticmethod
+    def add_category_to_task(db: Session, task_id: int, user_id: int, category_id: int) -> bool:
+        """Agregar categoría a tarea (validar que el usuario posea la tarea y categoría)."""
+        # Verificar que la tarea pertenece al usuario
+        task = TaskRepository.get_task_by_id(db, task_id, user_id)
+        if not task:
+            return False
+        
+        # Verificar que la categoría pertenece al usuario
+        category = CategoryRepository.get_category_by_id(db, category_id, user_id)
+        if not category:
+            return False
+        
+        # Agregar la relación
+        TaskCategoryRepository.add_category_to_task(db, task_id, category_id)
+        
+        # Registrar evento
+        TaskEventRepository.create_event(
+            db=db,
+            task_id=task_id,
+            user_id=user_id,
+            event_type="category_added",
+            payload={"category_id": category_id}
+        )
+        
+        return True
+
+    @staticmethod
+    def remove_category_from_task(db: Session, task_id: int, user_id: int, category_id: int) -> bool:
+        """Remover categoría de tarea (validar que el usuario posea la tarea)."""
+        # Verificar que la tarea pertenece al usuario
+        task = TaskRepository.get_task_by_id(db, task_id, user_id)
+        if not task:
+            return False
+        
+        # Remover la relación
+        success = TaskCategoryRepository.remove_category_from_task(db, task_id, category_id)
+        
+        if success:
+            # Registrar evento
+            TaskEventRepository.create_event(
+                db=db,
+                task_id=task_id,
+                user_id=user_id,
+                event_type="category_removed",
+                payload={"category_id": category_id}
+            )
+        
+        return success

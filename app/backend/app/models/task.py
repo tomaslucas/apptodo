@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Date, Text, ForeignKey, Index, JSON
-from sqlalchemy.orm import declarative_base
 from datetime import datetime
-
-Base = declarative_base()
+from app.models.user import Base
 
 
 class Task(Base):
