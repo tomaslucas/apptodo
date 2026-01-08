@@ -61,10 +61,19 @@ export const useUIStore = defineStore('ui', () => {
     if (data) modals.value[modalId].data = data
   }
 
-  const closeModal = (modalId: string) => {
-    if (modals.value[modalId]) {
-      modals.value[modalId].isOpen = false
+  const closeModal = (modalId?: string) => {
+    if (modalId) {
+      if (modals.value[modalId]) {
+        modals.value[modalId].isOpen = false
+      }
+    } else {
+      // Close all open modals if no specific ID provided
+      closeAllModals()
     }
+  }
+
+  const getActiveModal = (): Modal | undefined => {
+    return activeModals.value[0]
   }
 
   const toggleModal = (modalId: string, title?: string, data?: Record<string, any>) => {
@@ -124,6 +133,7 @@ export const useUIStore = defineStore('ui', () => {
     clearToasts,
     openModal,
     closeModal,
+    getActiveModal,
     toggleModal,
     registerModal,
     toggleSidebar,
