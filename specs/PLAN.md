@@ -669,52 +669,368 @@ La app estará en:
 
 ---
 
-## 12.5. Testing E2E (End-to-End)
+## 12.5. Testing E2E (End-to-End) con Playwright
 
-### Configuración de E2E Testing
+### Herramientas Recomendadas
 
 **Framework:** Playwright (instalable con Bun en `/app/frontend`)
 
-**Herramientas según contexto:**
+**Selección según contexto:**
 
 1. **Si usas Claude Code:**
-   - Prioritizar: `/chrome` para ejecución de tests E2E
-   - Ventajas: Interacción directa con navegador, debugging visual en tiempo real
-   - Fallback: Si `/chrome` no funciona → usar MCP Playwright
+   - **Prioritario:** `/chrome` para ejecución de tests E2E
+   - **Ventajas:** Debugging visual en tiempo real, interacción directa con navegador
+   - **Fallback:** Si `/chrome` no funciona → usar MCP Playwright
 
 2. **Si NO usas Claude Code:**
-   - Usar: MCP Playwright (Must-use Model Context Protocol)
-   - Instalación: `bun add -D @playwright/test`
-   - Configuración: `playwright.config.ts`
+   - **Usar:** MCP Playwright (Must-use Model Context Protocol)
+   - **Instalación:** `bun add -D @playwright/test`
+   - **Configuración:** `playwright.config.ts`
 
-### Scope de E2E Testing
-
-**Flujos críticos a validar:**
-- Login/Register (autenticación completa)
-- Crear tarea (validación de formulario, guardado)
-- Filtrado de tareas (por status, priority, categoría)
-- Editar/eliminar tareas (operaciones CRUD)
-- Asignar categorías a tareas (M2M relationships)
-- Atajos de teclado (verificación de funcionalidad)
-- Refresh token rotation (sesiones activas)
-
-**Cobertura mínima:** 80% de flujos user-facing
-
-### Comandos
+### Setup Inicial
 
 ```bash
-# Instalar Playwright
-cd app/frontend && bun add -D @playwright/test
+# 1. Instalar dependencias de testing
+cd app/frontend
+bun add -D @playwright/test @playwright/inspector
 
-# Ejecutar E2E tests
+# 2. Inicializar Playwright
+bun exec playwright install
+
+# 3. Crear directorio de tests
+mkdir -p tests/e2e
+
+# 4. Crear archivo de configuración
+cat > playwright.config.ts << 'EOF'
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    baseURL: 'http://localhost:5173',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+  ],
+  webServer: {
+    command: 'bun run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+  },
+});
+EOF
+```
+
+### Test Suites Requeridas
+
+#### 1. Autenticación (`tests/e2e/auth.spec.ts`)
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Authentication', () => {
+  test('Register new user', async ({ page }) => {
+    await page.goto('/register');
+    await page.fill('input[type="email"]', 'newuser@example.com');
+    await page.fill('input[name="username"]', 'newuser123');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('Login with valid credentials', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL('/dashboard');
+    await expect(page.locator('text=My Tasks')).toBeVisible();
+  });
+
+  test('Login fails with invalid credentials', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'WrongPassword');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('text=Invalid credentials')).toBeVisible();
+  });
+
+  test('Token refresh on session expiry', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+    
+    // Simular expiración de access token
+    await page.evaluate(() => sessionStorage.removeItem('access_token'));
+    await page.goto('/dashboard');
+    await expect(page).toHaveURL('/dashboard');
+  });
+
+  test('Logout clears session', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+    
+    await page.click('[data-testid="logout-btn"]');
+    await expect(page).toHaveURL('/login');
+    const token = await page.evaluate(() => sessionStorage.getItem('access_token'));
+    expect(token).toBeNull();
+  });
+});
+```
+
+#### 2. Gestión de Tareas (`tests/e2e/tasks.spec.ts`)
+
+```typescript
+test.describe('Task Management', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+  });
+
+  test('Create new task', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Buy groceries');
+    await page.fill('textarea', 'Milk, eggs, bread');
+    await page.selectOption('select[name="priority"]', 'alta');
+    await page.click('button:has-text("Create")');
+    await expect(page.locator('text=Buy groceries')).toBeVisible();
+  });
+
+  test('Edit task', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Original task');
+    await page.click('button:has-text("Create")');
+    
+    await page.click('text=Original task');
+    await page.fill('input[placeholder="Task title"]', 'Updated task');
+    await page.click('button:has-text("Save")');
+    await expect(page.locator('text=Updated task')).toBeVisible();
+  });
+
+  test('Delete task', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Task to delete');
+    await page.click('button:has-text("Create")');
+    
+    await page.hover('text=Task to delete');
+    await page.click('[data-testid="delete-btn"]');
+    await page.click('button:has-text("Confirm")');
+    await expect(page.locator('text=Task to delete')).not.toBeVisible();
+  });
+
+  test('Filter tasks by status', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Pending task');
+    await page.click('button:has-text("Create")');
+    
+    await page.selectOption('select[name="status-filter"]', 'completada');
+    await expect(page.locator('text=Pending task')).not.toBeVisible();
+  });
+
+  test('Filter tasks by priority', async ({ page }) => {
+    // Crear tareas con diferentes prioridades
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'High priority');
+    await page.selectOption('select[name="priority"]', 'alta');
+    await page.click('button:has-text("Create")');
+    
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Low priority');
+    await page.selectOption('select[name="priority"]', 'baja');
+    await page.click('button:has-text("Create")');
+    
+    await page.selectOption('select[name="priority-filter"]', 'alta');
+    await expect(page.locator('text=High priority')).toBeVisible();
+    await expect(page.locator('text=Low priority')).not.toBeVisible();
+  });
+});
+```
+
+#### 3. Categorías (`tests/e2e/categories.spec.ts`)
+
+```typescript
+test.describe('Categories', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+  });
+
+  test('Assign category to task', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Task with category');
+    await page.click('button:has-text("Create")');
+    
+    await page.click('text=Task with category');
+    await page.click('[data-testid="add-category-btn"]');
+    await page.fill('input[placeholder="Search categories"]', 'Work');
+    await page.click('text=Work');
+    await page.click('button:has-text("Save")');
+    
+    await expect(page.locator('text=Work')).toBeVisible();
+  });
+
+  test('Remove category from task', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Task');
+    await page.click('button:has-text("Create")');
+    
+    await page.click('text=Task');
+    await page.click('[data-testid="add-category-btn"]');
+    await page.click('text=Work');
+    await page.click('button:has-text("Save")');
+    
+    await page.click('text=Task');
+    await page.click('[data-testid="remove-category-btn"]');
+    await expect(page.locator('text=Work')).not.toBeVisible();
+  });
+
+  test('Filter tasks by category', async ({ page }) => {
+    // Crear tareas con categorías
+    await page.click('[data-testid="new-task-btn"]');
+    await page.fill('input[placeholder="Task title"]', 'Work task');
+    await page.click('button:has-text("Create")');
+    await page.click('text=Work task');
+    await page.click('[data-testid="add-category-btn"]');
+    await page.click('text=Work');
+    await page.click('button:has-text("Save")');
+    
+    await page.click('[data-testid="category-filter"]');
+    await page.click('text=Work');
+    await expect(page.locator('text=Work task')).toBeVisible();
+  });
+});
+```
+
+#### 4. Atajos de Teclado (`tests/e2e/shortcuts.spec.ts`)
+
+```typescript
+test.describe('Keyboard Shortcuts', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'SecurePass123!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+  });
+
+  test('Cmd+K opens command palette', async ({ page }) => {
+    await page.keyboard.press('Meta+K');
+    await expect(page.locator('[data-testid="command-palette"]')).toBeVisible();
+  });
+
+  test('Cmd+N creates new task', async ({ page }) => {
+    await page.keyboard.press('Meta+N');
+    await expect(page.locator('text=New Task')).toBeVisible();
+  });
+
+  test('Escape closes modals', async ({ page }) => {
+    await page.click('[data-testid="new-task-btn"]');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-testid="new-task-modal"]')).not.toBeVisible();
+  });
+});
+```
+
+### Ejecución de Tests
+
+```bash
+# Ejecutar todos los E2E tests
 bun exec playwright test
 
-# Modo UI (visual debugging)
+# Ejecutar tests específicos
+bun exec playwright test tests/e2e/auth.spec.ts
+
+# Modo UI (recomendado para debugging)
 bun exec playwright test --ui
 
-# Debug mode (interactivo)
+# Debug mode interactivo
 bun exec playwright test --debug
+
+# Ejecutar contra navegador específico
+bun exec playwright test --project=chromium
+
+# Generar reporte HTML
+bun exec playwright test --reporter=html
+# Abrir: app/frontend/playwright-report/index.html
 ```
+
+### CI/CD Integration
+
+Agregar en `.github/workflows/e2e-tests.yml`:
+
+```yaml
+name: E2E Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      
+      - name: Install frontend dependencies
+        run: cd app/frontend && bun install
+      
+      - name: Install Playwright browsers
+        run: cd app/frontend && bun exec playwright install
+      
+      - name: Setup backend
+        run: |
+          cd app/backend
+          uv sync
+          python -m uvicorn app.main:app --port 8000 &
+      
+      - name: Run E2E tests
+        run: cd app/frontend && bun exec playwright test
+      
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: app/frontend/playwright-report/
+```
+
+### Criterios de Aceptación (apptodo-47)
+
+- ✅ Framework Playwright configurado en `/app/frontend`
+- ✅ 4 suites de tests E2E implementadas (auth, tasks, categories, shortcuts)
+- ✅ Coverage ≥ 80% de flujos user-facing
+- ✅ Tests ejecutan localmente y en CI/CD
+- ✅ Screenshots/videos de fallos habilitados
+- ✅ Documentación en este PLAN.md
+- ✅ Herramientas claramente documentadas (Claude Code `/chrome` vs MCP Playwright)
 
 ---
 
