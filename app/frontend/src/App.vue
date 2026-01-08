@@ -93,77 +93,37 @@ onUnmounted(() => {
 
 <style scoped>
 .navbar {
-  background-color: #333;
-  padding: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  @apply bg-gray-800 shadow-md;
 }
 
 .nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  @apply flex justify-between items-center py-4;
 }
 
 .logo {
-  color: white;
-  text-decoration: none;
-  font-size: 1.5rem;
-  font-weight: bold;
+  @apply text-white text-2xl font-bold no-underline;
 }
 
 .nav-menu {
-  display: flex;
-  list-style: none;
-  gap: 2rem;
-  margin: 0;
-  padding: 0;
+  @apply flex list-none gap-4 sm:gap-8 m-0 p-0 items-center;
 }
 
 .nav-menu a {
-  color: white;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.nav-menu a:hover {
-  color: #4CAF50;
+  @apply text-white no-underline transition-colors duration-300 hover:text-green-400;
 }
 
 .shortcuts-btn {
-  background-color: transparent;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: background-color 0.3s;
-}
-
-.shortcuts-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  @apply bg-transparent text-white border-none px-3 sm:px-4 py-2 rounded cursor-pointer text-lg;
+  @apply transition-colors duration-300 hover:bg-white hover:bg-opacity-10;
 }
 
 .logout-btn {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.logout-btn:hover {
-  background-color: #45a049;
+  @apply bg-green-600 text-white border-none px-3 sm:px-4 py-2 rounded cursor-pointer font-medium;
+  @apply transition-colors duration-300 hover:bg-green-700;
 }
 
 .main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
 }
 </style>
