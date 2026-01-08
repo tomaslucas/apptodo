@@ -9,7 +9,8 @@ from app.schemas.user import (
     UserRegisterRequest, 
     UserLoginRequest, 
     AuthResponse,
-    UserResponse
+    UserResponse,
+    RegistrationResponse
 )
 from app.schemas.response import APIResponse
 from app.services.auth import AuthService
@@ -20,20 +21,28 @@ router = APIRouter(
 )
 
 
-@router.post("/register", response_model=APIResponse)
+@router.post("/register", response_model=APIResponse, status_code=status.HTTP_201_CREATED)
 def register(request: UserRegisterRequest, db: Session = Depends(get_db)):
-    """Registrar nuevo usuario."""
+    """Registrar nuevo usuario con validaciones backend."""
     try:
         user = AuthService.register_user(db, request.username, request.email, request.password)
         return APIResponse(
             status="success",
-            data={"user": user},
+            data={
+                "user": user,
+                "message": "Usuario registrado exitosamente"
+            },
             timestamp=datetime.utcnow()
         )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al registrar usuario"
         )
 
 
