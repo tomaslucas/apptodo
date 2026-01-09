@@ -10,6 +10,9 @@
         <div class="form-group">
           <label for="email">Email</label>
           <input v-model="email" type="email" id="email" required />
+          <div v-if="emailError" class="error-message">
+            {{ emailError }}
+          </div>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
@@ -72,10 +75,26 @@ const passwordError = computed(() => {
   return null
 })
 
+const emailError = computed(() => {
+  if (!email.value) return null
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.value)) {
+    return 'Invalid email format'
+  }
+  // Reject reserved domains
+  const reservedDomains = ['test.test', 'example.com', 'test', 'localhost']
+  const domain = email.value.split('@')[1]?.toLowerCase()
+  if (domain && reservedDomains.includes(domain)) {
+    return 'Please use a real email domain (e.g., gmail.com, yahoo.com)'
+  }
+  return null
+})
+
 const isFormValid = computed(() => {
   return (
     name.value.trim().length >= 3 &&
-    email.value.includes('@') &&
+    email.value.length > 0 &&
+    !emailError.value &&
     passwordMet.value.length &&
     passwordMet.value.uppercase &&
     passwordMet.value.digit &&
