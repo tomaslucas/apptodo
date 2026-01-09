@@ -86,8 +86,10 @@ describe('Transitions Utilities', () => {
       expect(element.style.animation).toBe('')
     })
 
-    it('should add fade-in class to element', () => {
+    it('should add fade-in class to element', async () => {
       fadeInElement(element, 0)
+      // The class is added asynchronously, so we need to wait
+      await new Promise((resolve) => setTimeout(resolve, 10))
       expect(element.classList.contains('animate-fade-in')).toBe(true)
     })
 

@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Backend API service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apptodo-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/app.db
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - DEBUG=${DEBUG:-false}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost}
+    volumes:
+      - ./data:/app/data
+      - ./app/backend:/app/backend
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Database (optional - using SQLite by default)
+  db:
+    image: sqlite:latest
+    container_name: apptodo-db
+    volumes:
+      - ./data:/data
+    # SQLite doesn't need a service, but we keep this for future upgrades
+
+  # Frontend development server
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile.dev
+    container_name: apptodo-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+    volumes:
+      - ./app/frontend/src:/app/src
+      - ./app/frontend/e2e:/app/e2e
+    command: npm run dev
+    depends_on:
+      - backend
+
+  # Nginx reverse proxy (production)
+  nginx:
+    image: nginx:alpine
+    container_name: apptodo-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./app/frontend/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    profiles:
+      - production
+
+volumes:
+  data:
+    driver: local
+
+networks:
+  default:
+    name: apptodo-network
