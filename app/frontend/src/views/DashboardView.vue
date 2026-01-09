@@ -169,6 +169,12 @@ onMounted(async () => {
   border-radius: 4px;
   font-size: 0.9rem;
   box-sizing: border-box;
+  color: #222;
+  font-weight: 500;
+}
+
+.filter-group input::placeholder {
+  color: #999;
 }
 
 .btn-clear {

@@ -138,6 +138,12 @@ const handleRegister = async () => {
   border-radius: 4px;
   font-size: 1rem;
   box-sizing: border-box;
+  color: #222;
+  font-weight: 500;
+}
+
+.form-group input::placeholder {
+  color: #999;
 }
 
 .form-group input:focus {
