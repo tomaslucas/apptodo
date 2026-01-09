@@ -99,20 +99,28 @@
             <span class="hint">(optional, max 10)</span>
           </label>
           <div class="categories-select">
-            <div
-              v-for="category in categoryStore.categories"
-              :key="category.id"
-              class="category-checkbox"
-            >
-              <input
-                type="checkbox"
-                :id="`category-${category.id}`"
-                :value="category.id"
-                v-model="formData.categories"
-                @change="handleFieldChange('categories', formData.categories)"
-              />
-              <label :for="`category-${category.id}`">{{ category.name }}</label>
+            <div v-if="categoryStore.isLoading" class="categories-loading">
+              Loading categories...
             </div>
+            <div v-else-if="categoryStore.categories.length === 0" class="categories-empty">
+              No categories available. Create categories first.
+            </div>
+            <template v-else>
+              <div
+                v-for="category in categoryStore.categories"
+                :key="category.id"
+                class="category-checkbox"
+              >
+                <input
+                  type="checkbox"
+                  :id="`category-${category.id}`"
+                  :value="category.id"
+                  v-model="formData.categories"
+                  @change="handleFieldChange('categories', formData.categories)"
+                />
+                <label :for="`category-${category.id}`">{{ category.name }}</label>
+              </div>
+            </template>
           </div>
           <div v-if="getCategoriesError && fieldStates.value.categories.isTouched" class="field-error">
             {{ getCategoriesError }}
@@ -352,6 +360,17 @@ watch(
   { deep: true }
 )
 
+// Watch for modal open state to load categories
+watch(
+  isOpen,
+  async (opened) => {
+    if (opened && !categoryStore.hasCategoriesLoaded()) {
+      await categoryStore.fetchCategories()
+    }
+  },
+  { immediate: true }
+)
+
 onMounted(async () => {
   // Load categories if not already loaded
   if (!categoryStore.hasCategoriesLoaded()) {
@@ -552,6 +571,15 @@ onUnmounted(() => {
   cursor: pointer;
   font-weight: normal;
   font-size: 0.9rem;
+}
+
+.categories-loading,
+.categories-empty {
+  grid-column: 1 / -1;
+  padding: 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 /* Field validation feedback */
