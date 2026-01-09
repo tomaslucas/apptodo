@@ -8,7 +8,7 @@
 
       <form @submit.prevent="submitForm" class="task-form">
         <!-- Title Field -->
-        <div class="form-group" :class="{ 'has-error': getTitleError && fieldStates.value.title.isTouched }">
+        <div class="form-group" :class="{ 'has-error': getTitleError && fieldStates.value.title?.isTouched }">
           <label for="title">
             Task Title
             <span class="required">*</span>
@@ -20,9 +20,9 @@
             placeholder="Enter task title"
             @blur="handleFieldBlur('title')"
             @change="handleFieldChange('title', formData.title)"
-            :class="{ 'input-error': getTitleError && fieldStates.value.title.isTouched }"
+            :class="{ 'input-error': getTitleError && fieldStates.value.title?.isTouched }"
           />
-          <div v-if="getTitleError && fieldStates.value.title.isTouched" class="field-error">
+          <div v-if="getTitleError && fieldStates.value.title?.isTouched" class="field-error">
             {{ getTitleError }}
           </div>
           <div v-if="!getTitleError && formData.title.length > 0" class="field-hint">
@@ -31,7 +31,7 @@
         </div>
 
         <!-- Description Field -->
-        <div class="form-group" :class="{ 'has-error': getDescriptionError && fieldStates.value.description.isTouched }">
+        <div class="form-group" :class="{ 'has-error': getDescriptionError && fieldStates.value.description?.isTouched }">
           <label for="description">Description</label>
           <textarea
             v-model="formData.description"
@@ -40,9 +40,9 @@
             rows="4"
             @blur="handleFieldBlur('description')"
             @change="handleFieldChange('description', formData.description)"
-            :class="{ 'input-error': getDescriptionError && fieldStates.value.description.isTouched }"
+            :class="{ 'input-error': getDescriptionError && fieldStates.value.description?.isTouched }"
           ></textarea>
-          <div v-if="getDescriptionError && fieldStates.value.description.isTouched" class="field-error">
+          <div v-if="getDescriptionError && fieldStates.value.description?.isTouched" class="field-error">
             {{ getDescriptionError }}
           </div>
           <div v-if="!getDescriptionError && formData.description.length > 0" class="field-hint">
@@ -70,13 +70,13 @@
               <option value="media">Medium</option>
               <option value="alta">High</option>
             </select>
-            <div v-if="getPriorityError && fieldStates.value.priority.isTouched" class="field-error">
+            <div v-if="getPriorityError && fieldStates.value.priority?.isTouched" class="field-error">
               {{ getPriorityError }}
             </div>
           </div>
 
           <!-- Deadline Field -->
-          <div class="form-group" :class="{ 'has-error': getDeadlineError && fieldStates.value.deadline.isTouched }">
+          <div class="form-group" :class="{ 'has-error': getDeadlineError && fieldStates.value.deadline?.isTouched }">
             <label for="deadline">Deadline</label>
             <input
               v-model="formData.deadline"
@@ -84,9 +84,9 @@
               id="deadline"
               @blur="handleFieldBlur('deadline')"
               @change="handleFieldChange('deadline', formData.deadline)"
-              :class="{ 'input-error': getDeadlineError && fieldStates.value.deadline.isTouched }"
+              :class="{ 'input-error': getDeadlineError && fieldStates.value.deadline?.isTouched }"
             />
-            <div v-if="getDeadlineError && fieldStates.value.deadline.isTouched" class="field-error">
+            <div v-if="getDeadlineError && fieldStates.value.deadline?.isTouched" class="field-error">
               {{ getDeadlineError }}
             </div>
           </div>
@@ -155,7 +155,7 @@
               </div>
             </template>
           </div>
-          <div v-if="getCategoriesError && fieldStates.value.categories.isTouched" class="field-error">
+          <div v-if="getCategoriesError && fieldStates.value.categories?.isTouched" class="field-error">
             {{ getCategoriesError }}
           </div>
           <div v-if="formData.categories.length > 0" class="field-hint">
@@ -181,7 +181,7 @@
             <option value="en_progreso">In Progress</option>
             <option value="completada">Completed</option>
           </select>
-          <div v-if="getStatusError && fieldStates.value.status.isTouched" class="field-error">
+          <div v-if="getStatusError && fieldStates.value.status?.isTouched" class="field-error">
             {{ getStatusError }}
           </div>
         </div>
