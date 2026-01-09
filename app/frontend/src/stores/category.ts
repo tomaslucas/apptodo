@@ -32,7 +32,8 @@ export const useCategoryStore = defineStore('category', () => {
     error.value = null
     try {
       const response = await apiClient.get('/api/v1/categories')
-      categories.value = response.data.data || response.data
+      const responseData = response.data.data || response.data
+      categories.value = responseData.categories || responseData
       hasLoaded.value = true
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch categories'
@@ -46,7 +47,8 @@ export const useCategoryStore = defineStore('category', () => {
     error.value = null
     try {
       const response = await apiClient.post('/api/v1/categories', categoryData)
-      const newCategory = response.data.data || response.data
+      const responseData = response.data.data || response.data
+      const newCategory = responseData.category || responseData
       categories.value.push(newCategory)
       return newCategory
     } catch (err) {

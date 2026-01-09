@@ -98,16 +98,49 @@
             Categories
             <span class="hint">(optional, max 10)</span>
           </label>
+          
+          <!-- New category input -->
+          <div class="category-input-wrapper">
+            <input
+              type="text"
+              v-model="newCategoryName"
+              placeholder="Type a category name and press Enter to create"
+              @keydown.enter.prevent="createNewCategory"
+              class="category-input"
+              :disabled="isCreatingCategory"
+            />
+            <button
+              type="button"
+              @click="createNewCategory"
+              class="btn-add-category"
+              :disabled="!newCategoryName.trim() || isCreatingCategory"
+            >
+              {{ isCreatingCategory ? '...' : '+' }}
+            </button>
+          </div>
+          
+          <!-- Selected categories as tags -->
+          <div v-if="selectedCategoryNames.length > 0" class="selected-categories">
+            <span
+              v-for="cat in selectedCategoryNames"
+              :key="cat.id"
+              class="category-tag"
+            >
+              {{ cat.name }}
+              <button type="button" @click="removeCategory(cat.id)" class="tag-remove">×</button>
+            </span>
+          </div>
+          
           <div class="categories-select">
-            <div v-if="categoryStore.isLoading" class="categories-loading">
+            <div v-if="categoryStore.isLoading && !isCreatingCategory" class="categories-loading">
               Loading categories...
             </div>
-            <div v-else-if="categoryStore.categories.length === 0" class="categories-empty">
-              No categories available. Create categories first.
+            <div v-else-if="categoryStore.categories.length === 0 && !isCreatingCategory" class="categories-empty">
+              No categories yet. Type above to create your first category.
             </div>
             <template v-else>
               <div
-                v-for="category in categoryStore.categories"
+                v-for="category in availableCategories"
                 :key="category.id"
                 class="category-checkbox"
               >
@@ -203,6 +236,8 @@ const isEditMode = ref(false)
 const currentTaskId = ref<string | null>(null)
 const isLoading = ref(false)
 const apiError = ref<string | null>(null)
+const newCategoryName = ref('')
+const isCreatingCategory = ref(false)
 
 const initialFormData = {
   title: '',
@@ -256,6 +291,64 @@ const anyFieldTouched = computed(() => Object.values(fieldStates.value).some((st
 // Check if form has validation errors
 const hasValidationErrors = computed(() => Object.keys(errorMap.value).length > 0)
 
+// Available categories (excluding already selected)
+const availableCategories = computed(() => {
+  return categoryStore.categories
+})
+
+// Get selected category details for displaying tags
+const selectedCategoryNames = computed(() => {
+  return formData.value.categories
+    .map(id => categoryStore.categories.find(c => c.id === id))
+    .filter((c): c is NonNullable<typeof c> => c !== undefined)
+})
+
+// Create a new category
+const createNewCategory = async () => {
+  const name = newCategoryName.value.trim()
+  if (!name) return
+
+  // Check if category already exists
+  const existing = categoryStore.categories.find(
+    c => c.name.toLowerCase() === name.toLowerCase()
+  )
+  if (existing) {
+    // If exists, just select it
+    if (!formData.value.categories.includes(existing.id)) {
+      formData.value.categories.push(existing.id)
+      handleFieldChange('categories', formData.value.categories)
+    }
+    newCategoryName.value = ''
+    return
+  }
+
+  // Check max categories limit
+  if (formData.value.categories.length >= 10) {
+    apiError.value = 'Maximum 10 categories allowed'
+    return
+  }
+
+  isCreatingCategory.value = true
+  try {
+    const newCategory = await categoryStore.createCategory({ name })
+    if (newCategory && newCategory.id) {
+      formData.value.categories.push(newCategory.id)
+      handleFieldChange('categories', formData.value.categories)
+    }
+    newCategoryName.value = ''
+  } catch (err) {
+    apiError.value = 'Failed to create category'
+  } finally {
+    isCreatingCategory.value = false
+  }
+}
+
+// Remove a category from selection
+const removeCategory = (categoryId: string) => {
+  formData.value.categories = formData.value.categories.filter(id => id !== categoryId)
+  handleFieldChange('categories', formData.value.categories)
+}
+
 const closeModal = () => {
   if (props.modalId) {
     uiStore.closeModal(props.modalId)
@@ -269,6 +362,7 @@ const resetForm = () => {
   isEditMode.value = false
   currentTaskId.value = null
   apiError.value = null
+  newCategoryName.value = ''
 }
 
 const submitForm = async () => {
@@ -541,6 +635,88 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.category-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.category-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.category-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.category-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.btn-add-category {
+  padding: 0.75rem 1rem;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 44px;
+}
+
+.btn-add-category:hover:not(:disabled) {
+  background-color: #5568d3;
+}
+
+.btn-add-category:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.selected-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  background-color: #667eea;
+  color: white;
+  border-radius: 16px;
+  font-size: 0.85rem;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.8;
+}
+
+.tag-remove:hover {
+  opacity: 1;
 }
 
 .categories-select {
