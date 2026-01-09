@@ -28,7 +28,7 @@
       </button>
     </div>
 
-    <Transition-group
+    <TransitionGroup
       v-else
       name="slide-up"
       tag="div"
@@ -44,7 +44,7 @@
         @delete="onTaskDeleted"
         @updateStatus="onTaskStatusUpdated"
       />
-    </Transition-group>
+    </TransitionGroup>
   </div>
 </template>
 

@@ -66,9 +66,9 @@
               :class="{ 'input-error': getPriorityError }"
             >
               <option value="">-- Select Priority --</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value="baja">Low</option>
+              <option value="media">Medium</option>
+              <option value="alta">High</option>
             </select>
             <div v-if="getPriorityError && fieldStates.value.priority.isTouched" class="field-error">
               {{ getPriorityError }}
@@ -177,9 +177,9 @@
             :class="{ 'input-error': getStatusError }"
           >
             <option value="">-- Select Status --</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value="pendiente">Pending</option>
+            <option value="en_progreso">In Progress</option>
+            <option value="completada">Completed</option>
           </select>
           <div v-if="getStatusError && fieldStates.value.status.isTouched" class="field-error">
             {{ getStatusError }}
@@ -242,10 +242,10 @@ const isCreatingCategory = ref(false)
 const initialFormData = {
   title: '',
   description: '',
-  priority: 'medium' as 'low' | 'medium' | 'high',
+  priority: 'media' as 'baja' | 'media' | 'alta',
   deadline: '',
   categories: [] as string[],
-  status: 'pending' as 'pending' | 'in_progress' | 'completed',
+  status: 'pendiente' as 'pendiente' | 'en_progreso' | 'completada',
 }
 
 // Initialize form validation composable
@@ -400,13 +400,10 @@ const submitForm = async () => {
       // Create new task
       await taskStore.createTask({
         title: formData.value.title,
-        description: formData.value.description,
+        description: formData.value.description || undefined,
         priority: formData.value.priority,
-        deadline: formData.value.deadline,
-        categories: formData.value.categories,
+        deadline: formData.value.deadline || undefined,
         status: formData.value.status,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       } as Omit<Task, 'id'>)
       uiStore.addToast('Task created successfully', 'success')
     }
