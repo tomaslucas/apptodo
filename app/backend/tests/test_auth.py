@@ -127,7 +127,7 @@ class TestAuthRegister:
 class TestAuthLogin:
     """Tests para el endpoint de login."""
 
-    def test_login_success(self):
+    def test_login_success(self, client):
         """Login exitoso."""
         # Primero registrar usuario
         client.post(
@@ -154,7 +154,7 @@ class TestAuthLogin:
         assert response.json()["data"]["user"]["email"] == "test@example.com"
         assert "refresh_token" in response.cookies
 
-    def test_login_invalid_email(self):
+    def test_login_invalid_email(self, client):
         """Login con email no registrado."""
         response = client.post(
             "/api/v1/auth/login",
@@ -166,7 +166,7 @@ class TestAuthLogin:
         assert response.status_code == 401
         assert "Email o contraseña incorrectos" in response.json()["detail"]
 
-    def test_login_invalid_password(self):
+    def test_login_invalid_password(self, client):
         """Login con contraseña incorrecta."""
         # Registrar usuario
         client.post(
@@ -193,7 +193,7 @@ class TestAuthLogin:
 class TestAuthLogout:
     """Tests para el endpoint de logout."""
 
-    def test_logout_success(self):
+    def test_logout_success(self, client):
         """Logout exitoso."""
         response = client.post("/api/v1/auth/logout")
         assert response.status_code == 200
@@ -205,7 +205,7 @@ class TestAuthLogout:
 class TestAuthMe:
     """Tests para el endpoint GET /auth/me."""
 
-    def test_get_current_user_success(self):
+    def test_get_current_user_success(self, client):
         """Obtener usuario actual con token válido."""
         # Registrar y hacer login
         client.post(
@@ -237,13 +237,13 @@ class TestAuthMe:
         assert response.json()["status"] == "success"
         assert response.json()["data"]["user"]["email"] == "test@example.com"
 
-    def test_get_current_user_no_token(self):
+    def test_get_current_user_no_token(self, client):
         """Obtener usuario sin token."""
         response = client.get("/api/v1/auth/me")
         assert response.status_code == 401
         assert "Authorization header missing" in response.json()["detail"]
 
-    def test_get_current_user_invalid_token(self):
+    def test_get_current_user_invalid_token(self, client):
         """Obtener usuario con token inválido."""
         response = client.get(
             "/api/v1/auth/me",
