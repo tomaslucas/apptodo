@@ -2,6 +2,8 @@
   <div class="task-list-container">
     <FilterBar />
 
+    <BatchActionsBar />
+
     <div class="task-list-header">
       <h2>{{ taskStore.filteredTasks.length }} Tasks</h2>
       <button @click="createNewTask" class="btn-create-task" data-testid="new-task-btn">
@@ -55,6 +57,7 @@ import { useShortcuts } from '../utils/shortcutsManager'
 import FilterBar from './FilterBar.vue'
 import TaskItem from './TaskItem.vue'
 import TaskForm from './TaskForm.vue'
+import BatchActionsBar from './BatchActionsBar.vue'
 
 const taskStore = useTaskStore()
 const categoryStore = useCategoryStore()

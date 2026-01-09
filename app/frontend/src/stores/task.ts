@@ -18,6 +18,7 @@ export const useTaskStore = defineStore('task', () => {
   const tasks = ref<Task[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const selectedTaskIds = ref<Set<string>>(new Set())
   const filters = ref({
     status: null as string | null,
     priority: null as string | null,
@@ -127,17 +128,142 @@ export const useTaskStore = defineStore('task', () => {
     }
   }
 
+  const toggleTaskSelection = (taskId: string) => {
+    if (selectedTaskIds.value.has(taskId)) {
+      selectedTaskIds.value.delete(taskId)
+    } else {
+      selectedTaskIds.value.add(taskId)
+    }
+  }
+
+  const selectAll = () => {
+    filteredTasks.value.forEach((task) => selectedTaskIds.value.add(task.id))
+  }
+
+  const deselectAll = () => {
+    selectedTaskIds.value.clear()
+  }
+
+  const isTaskSelected = (taskId: string) => {
+    return selectedTaskIds.value.has(taskId)
+  }
+
+  const getSelectedCount = computed(() => selectedTaskIds.value.size)
+
+  const batchComplete = async () => {
+    if (selectedTaskIds.value.size === 0) return false
+    isLoading.value = true
+    error.value = null
+    try {
+      const taskIds = Array.from(selectedTaskIds.value)
+      const response = await apiClient.post('/api/v1/tasks/batch/complete', { task_ids: taskIds })
+      
+      // Update tasks in store
+      taskIds.forEach((taskId) => {
+        const index = tasks.value.findIndex((t) => t.id === taskId)
+        if (index !== -1) {
+          tasks.value[index].status = 'completed'
+        }
+      })
+      
+      selectedTaskIds.value.clear()
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to complete tasks'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const batchDelete = async () => {
+    if (selectedTaskIds.value.size === 0) return false
+    isLoading.value = true
+    error.value = null
+    try {
+      const taskIds = Array.from(selectedTaskIds.value)
+      await apiClient.post('/api/v1/tasks/batch/delete', { task_ids: taskIds })
+      
+      // Remove tasks from store
+      tasks.value = tasks.value.filter((t) => !taskIds.includes(t.id))
+      selectedTaskIds.value.clear()
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete tasks'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const batchRestore = async () => {
+    if (selectedTaskIds.value.size === 0) return false
+    isLoading.value = true
+    error.value = null
+    try {
+      const taskIds = Array.from(selectedTaskIds.value)
+      const response = await apiClient.post('/api/v1/tasks/batch/restore', { task_ids: taskIds })
+      
+      // Refetch tasks to get the restored ones
+      await fetchTasks()
+      selectedTaskIds.value.clear()
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to restore tasks'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const batchUpdate = async (updates: { status?: string; priority?: string }) => {
+    if (selectedTaskIds.value.size === 0) return false
+    isLoading.value = true
+    error.value = null
+    try {
+      const taskIds = Array.from(selectedTaskIds.value)
+      await apiClient.patch('/api/v1/tasks/batch/update', { task_ids: taskIds, ...updates })
+      
+      // Update tasks in store
+      taskIds.forEach((taskId) => {
+        const index = tasks.value.findIndex((t) => t.id === taskId)
+        if (index !== -1) {
+          if (updates.status) tasks.value[index].status = updates.status as any
+          if (updates.priority) tasks.value[index].priority = updates.priority as any
+        }
+      })
+      
+      selectedTaskIds.value.clear()
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update tasks'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     tasks,
     filteredTasks,
     isLoading,
     error,
     filters,
+    selectedTaskIds,
+    getSelectedCount,
     fetchTasks,
     createTask,
     updateTask,
     deleteTask,
     setFilter,
     clearFilters,
+    toggleTaskSelection,
+    selectAll,
+    deselectAll,
+    isTaskSelected,
+    batchComplete,
+    batchDelete,
+    batchRestore,
+    batchUpdate,
   }
 })

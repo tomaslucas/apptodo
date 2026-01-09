@@ -1,7 +1,15 @@
 <template>
-  <div :class="['task-item', { completed: task.status === 'completed' }]">
+  <div :class="['task-item', { completed: task.status === 'completed', selected: isSelected }]">
     <div class="task-item-header">
       <div class="task-checkbox-title">
+        <input
+          type="checkbox"
+          class="task-select-checkbox"
+          :checked="isSelected"
+          @change="toggleSelection"
+          data-testid="task-select-checkbox"
+          title="Select task for batch operations"
+        />
         <input
           type="checkbox"
           class="task-checkbox"
@@ -66,9 +74,15 @@ const taskStore = useTaskStore()
 const categoryStore = useCategoryStore()
 const uiStore = useUIStore()
 
+const isSelected = computed(() => taskStore.isTaskSelected(props.task.id))
+
 const showActions = computed(() => {
   return true // Always show actions for now, can be toggled on hover
 })
+
+const toggleSelection = () => {
+  taskStore.toggleTaskSelection(props.task.id)
+}
 
 const formatLabel = (text: string): string => {
   return text
@@ -144,6 +158,21 @@ const openCategoryModal = () => {
 .task-item.completed .task-title {
   text-decoration: line-through;
   color: #999;
+}
+
+.task-item.selected {
+  background-color: #f0f4ff;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.task-select-checkbox {
+  margin-top: 0.25rem;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #667eea;
 }
 
 .task-item-header {
