@@ -56,7 +56,8 @@ export const useTaskStore = defineStore('task', () => {
 
       const url = `/api/v1/tasks${params.toString() ? '?' + params.toString() : ''}`
       const response = await apiClient.get(url)
-      tasks.value = response.data.data || response.data
+      const responseData = response.data.data || response.data
+      tasks.value = responseData.tasks || responseData
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch tasks'
     } finally {
@@ -69,7 +70,8 @@ export const useTaskStore = defineStore('task', () => {
     error.value = null
     try {
       const response = await apiClient.post('/api/v1/tasks', taskData)
-      const newTask = response.data.data || response.data
+      const responseData = response.data.data || response.data
+      const newTask = responseData.task || responseData
       tasks.value.push(newTask)
       return newTask
     } catch (err) {
@@ -85,7 +87,8 @@ export const useTaskStore = defineStore('task', () => {
     error.value = null
     try {
       const response = await apiClient.patch(`/api/v1/tasks/${taskId}`, updates)
-      const updatedTask = response.data.data || response.data
+      const responseData = response.data.data || response.data
+      const updatedTask = responseData.task || responseData
       const index = tasks.value.findIndex((t) => t.id === taskId)
       if (index !== -1) {
         tasks.value[index] = updatedTask
