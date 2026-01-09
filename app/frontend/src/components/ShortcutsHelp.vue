@@ -112,11 +112,12 @@ const closeModal = () => {
 
 <style scoped>
 .shortcuts-help-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+   @apply fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
 }
 
 .shortcuts-help-modal {
-  @apply bg-white rounded-xl shadow-large max-w-2xl w-11/12 max-h-4/5 flex flex-col overflow-hidden;
+   @apply bg-white rounded-xl shadow-large max-w-2xl w-11/12 flex flex-col overflow-hidden;
+   max-height: 80vh;
 }
 
 .modal-header {
@@ -205,9 +206,10 @@ const closeModal = () => {
 }
 
 @media (max-width: 640px) {
-  .shortcuts-help-modal {
-    @apply max-h-5/6 w-11/12;
-  }
+   .shortcuts-help-modal {
+     @apply w-11/12;
+     max-height: 83.33vh;
+   }
 
   .shortcut-item {
     @apply flex-col items-start gap-3;

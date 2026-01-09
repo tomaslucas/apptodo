@@ -28,17 +28,17 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const containerClass = computed(() => {
-  const classes = ['flex flex-col items-center justify-center']
-  
-  if (props.centered) {
-    classes.push('h-full')
-  }
-  
-  if (props.overlay) {
-    classes.push('fixed inset-0 bg-black/50 z-50')
-  }
-  
-  return classes.join(' ')
+   const classes = ['flex flex-col items-center justify-center']
+   
+   if (props.centered) {
+     classes.push('h-full')
+   }
+   
+   if (props.overlay) {
+     classes.push('fixed top-0 left-0 right-0 bottom-0 bg-black/50 z-50')
+   }
+   
+   return classes.join(' ')
 })
 
 const spinnerClass = computed(() => {
