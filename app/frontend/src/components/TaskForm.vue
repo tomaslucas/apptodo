@@ -399,7 +399,9 @@ onUnmounted(() => {
 .modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: #1a1a1a;
+  font-weight: 600;
+  opacity: 1;
 }
 
 .btn-close {
@@ -445,9 +447,10 @@ onUnmounted(() => {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: #1a1a1a;
   font-weight: 500;
   font-size: 0.95rem;
+  opacity: 1;
 }
 
 .required {
@@ -474,6 +477,17 @@ onUnmounted(() => {
   font-family: inherit;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  cursor: text;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.form-group input[type='text']::placeholder,
+.form-group textarea::placeholder {
+  color: #999;
+  opacity: 0.7;
 }
 
 .form-group input[type='text']:focus,
