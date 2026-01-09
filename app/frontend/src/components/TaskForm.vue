@@ -334,8 +334,10 @@ const createNewCategory = async () => {
     if (newCategory && newCategory.id) {
       formData.value.categories.push(newCategory.id)
       handleFieldChange('categories', formData.value.categories)
+      newCategoryName.value = ''
+    } else {
+      apiError.value = categoryStore.error || 'Failed to create category'
     }
-    newCategoryName.value = ''
   } catch (err) {
     apiError.value = 'Failed to create category'
   } finally {

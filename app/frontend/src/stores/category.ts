@@ -25,8 +25,8 @@ export const useCategoryStore = defineStore('category', () => {
     return map
   })
 
-  const fetchCategories = async () => {
-    if (hasLoaded.value) return // Avoid redundant fetches
+  const fetchCategories = async (force: boolean = false) => {
+    if (hasLoaded.value && !force) return // Avoid redundant fetches
 
     isLoading.value = true
     error.value = null
@@ -35,8 +35,10 @@ export const useCategoryStore = defineStore('category', () => {
       const responseData = response.data.data || response.data
       categories.value = responseData.categories || responseData
       hasLoaded.value = true
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch categories'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { detail?: string } }; message?: string }
+      error.value = axiosError.response?.data?.detail || axiosError.message || 'Failed to fetch categories'
+      console.error('Failed to fetch categories:', error.value)
     } finally {
       isLoading.value = false
     }
@@ -51,8 +53,11 @@ export const useCategoryStore = defineStore('category', () => {
       const newCategory = responseData.category || responseData
       categories.value.push(newCategory)
       return newCategory
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to create category'
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { detail?: string } }; message?: string }
+      const errorMessage = axiosError.response?.data?.detail || axiosError.message || 'Failed to create category'
+      error.value = errorMessage
+      console.error('Failed to create category:', errorMessage)
       return null
     } finally {
       isLoading.value = false
