@@ -82,3 +82,6 @@ Thumbs.db
 *.bak
 .tmp/
 temp/
+
+# bv (beads viewer) local config and caches
+.bv/
