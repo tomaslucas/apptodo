@@ -82,10 +82,28 @@ export const useAuthStore = defineStore('auth', () => {
       
       // After registration, user should login
       return true
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Registration failed'
+    } catch (err: any) {
+      let errorMsg = 'Registration failed'
+      
+      // Extract detailed error from axios
+      if (err.response?.data?.detail) {
+        errorMsg = err.response.data.detail
+      } else if (err.response?.status === 422) {
+        // Pydantic validation error
+        const errors = err.response?.data?.detail
+        if (Array.isArray(errors)) {
+          errorMsg = errors.map((e: any) => e.msg || e.detail).join(', ')
+        } else if (typeof errors === 'string') {
+          errorMsg = errors
+        } else {
+          errorMsg = 'Validation error - please check all fields'
+        }
+      } else if (err instanceof Error) {
+        errorMsg = err.message
+      }
+      
       error.value = errorMsg
-      console.error('Register error:', errorMsg)
+      console.error('Register error:', errorMsg, err.response?.data)
       return false
     } finally {
       isLoading.value = false
