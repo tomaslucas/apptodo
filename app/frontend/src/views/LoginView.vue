@@ -62,7 +62,8 @@ const handleLogin = async () => {
 .login-card h1 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #333;
+  color: #222;
+  font-weight: 600;
 }
 
 .form-group {
@@ -72,8 +73,8 @@ const handleLogin = async () => {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
+  color: #222;
+  font-weight: 600;
 }
 
 .form-group input {

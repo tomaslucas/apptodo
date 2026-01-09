@@ -110,18 +110,23 @@ onMounted(async () => {
 
 .dashboard-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: #ffffff;
   padding: 2rem;
   margin: -2rem -2rem 2rem -2rem;
 }
 
 .dashboard-header h1 {
   margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-header p {
   margin: 0;
-  opacity: 0.9;
+  opacity: 0.95;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-content {
@@ -140,7 +145,8 @@ onMounted(async () => {
 
 .sidebar h3 {
   margin: 0 0 1.5rem 0;
-  color: #333;
+  color: #222;
+  font-weight: 600;
 }
 
 .filter-group {
@@ -150,8 +156,8 @@ onMounted(async () => {
 .filter-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
+  color: #222;
+  font-weight: 600;
   font-size: 0.9rem;
 }
 
@@ -250,11 +256,12 @@ onMounted(async () => {
 
 .task-header h3 {
   margin: 0;
-  color: #333;
+  color: #222;
+  font-weight: 600;
 }
 
 .task-description {
-  color: #666;
+  color: #555;
   margin-bottom: 1rem;
   font-size: 0.95rem;
 }
@@ -311,7 +318,7 @@ onMounted(async () => {
 
 .deadline {
   font-size: 0.9rem;
-  color: #999;
+  color: #777;
 }
 
 @media (max-width: 768px) {

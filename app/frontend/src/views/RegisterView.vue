@@ -13,7 +13,18 @@
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input v-model="password" type="password" id="password" required />
+          <input v-model="password" type="password" id="password" required @input="validatePassword" />
+          <div class="password-requirements">
+            <div :class="['req-item', { met: passwordMet.length }]">
+              {{ passwordMet.length ? '✓' : '○' }} At least 8 characters
+            </div>
+            <div :class="['req-item', { met: passwordMet.uppercase }]">
+              {{ passwordMet.uppercase ? '✓' : '○' }} At least 1 uppercase letter
+            </div>
+            <div :class="['req-item', { met: passwordMet.digit }]">
+              {{ passwordMet.digit ? '✓' : '○' }} At least 1 number
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="confirm-password">Confirm Password</label>
@@ -25,7 +36,7 @@
         <div v-if="authStore.error" class="error-message">
           {{ authStore.error }}
         </div>
-        <button type="submit" :disabled="authStore.isLoading" class="btn-submit">
+        <button type="submit" :disabled="authStore.isLoading || !isFormValid" class="btn-submit">
           {{ authStore.isLoading ? 'Registering...' : 'Register' }}
         </button>
       </form>
@@ -48,6 +59,12 @@ const confirmPassword = ref('')
 const router = useRouter()
 const authStore = useAuthStore()
 
+const passwordMet = computed(() => ({
+  length: password.value.length >= 8,
+  uppercase: /[A-Z]/.test(password.value),
+  digit: /[0-9]/.test(password.value)
+}))
+
 const passwordError = computed(() => {
   if (password.value && confirmPassword.value && password.value !== confirmPassword.value) {
     return 'Passwords do not match'
@@ -55,8 +72,24 @@ const passwordError = computed(() => {
   return null
 })
 
+const isFormValid = computed(() => {
+  return (
+    name.value.trim().length >= 3 &&
+    email.value.includes('@') &&
+    passwordMet.value.length &&
+    passwordMet.value.uppercase &&
+    passwordMet.value.digit &&
+    password.value === confirmPassword.value &&
+    !passwordError.value
+  )
+})
+
+const validatePassword = () => {
+  // Validation happens in computed properties
+}
+
 const handleRegister = async () => {
-  if (passwordError.value) return
+  if (passwordError.value || !isFormValid.value) return
 
   if (await authStore.register(email.value, password.value, name.value)) {
     router.push('/dashboard')
@@ -155,5 +188,30 @@ const handleRegister = async () => {
 
 .login-link a:hover {
   text-decoration: underline;
+}
+
+.password-requirements {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.req-item {
+  color: #999;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.req-item.met {
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.req-item:last-child {
+  margin-bottom: 0;
 }
 </style>
