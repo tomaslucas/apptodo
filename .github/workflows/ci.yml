@@ -1,0 +1,71 @@
+name: CI Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # Backend tests
+  backend-test:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        working-directory: app/backend
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          uv sync
+
+      - name: Run linting
+        working-directory: app/backend
+        run: |
+          source .venv/bin/activate
+          flake8 app/
+          black --check app/
+          isort --check-only app/
+
+      - name: Run tests
+        working-directory: app/backend
+        run: |
+          source .venv/bin/activate
+          pytest --cov=app
+
+  # Frontend tests
+  frontend-test:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        working-directory: app/frontend
+        run: bun install
+
+      - name: Run linting
+        working-directory: app/frontend
+        run: bun run lint
+
+      - name: Run type check
+        working-directory: app/frontend
+        run: bun run type-check
+
+      - name: Run unit tests
+        working-directory: app/frontend
+        run: bun run test -- --run
