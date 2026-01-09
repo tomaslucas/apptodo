@@ -6,24 +6,44 @@
 
     <div class="task-list-header">
       <h2>{{ taskStore.filteredTasks.length }} Tasks</h2>
-      <button @click="createNewTask" class="btn-create-task" data-testid="new-task-btn">
+      <button
+        class="btn-create-task"
+        data-testid="new-task-btn"
+        @click="createNewTask"
+      >
         + New Task
       </button>
     </div>
 
-    <TaskForm modalId="task-form" />
+    <TaskForm modal-id="task-form" />
 
-    <div v-if="taskStore.isLoading" class="loading-state">
-      <div class="spinner"></div>
+    <div
+      v-if="taskStore.isLoading"
+      class="loading-state"
+    >
+      <div class="spinner" />
       <p>Loading tasks...</p>
     </div>
 
-    <div v-else-if="taskStore.filteredTasks.length === 0" class="empty-state">
-      <div class="empty-icon">📋</div>
+    <div
+      v-else-if="taskStore.filteredTasks.length === 0"
+      class="empty-state"
+    >
+      <div class="empty-icon">
+        📋
+      </div>
       <h3>No tasks found</h3>
-      <p v-if="hasActiveFilters">Try adjusting your filters</p>
-      <p v-else>Create your first task to get started</p>
-      <button v-if="!hasActiveFilters" @click="createNewTask" class="btn-create-empty">
+      <p v-if="hasActiveFilters">
+        Try adjusting your filters
+      </p>
+      <p v-else>
+        Create your first task to get started
+      </p>
+      <button
+        v-if="!hasActiveFilters"
+        class="btn-create-empty"
+        @click="createNewTask"
+      >
         Create Task
       </button>
     </div>
@@ -42,7 +62,7 @@
         :data-task-focus-index="index"
         @edit="editTask"
         @delete="onTaskDeleted"
-        @updateStatus="onTaskStatusUpdated"
+        @update-status="onTaskStatusUpdated"
       />
     </TransitionGroup>
   </div>

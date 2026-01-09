@@ -27,21 +27,18 @@ jobs:
         working-directory: app/backend
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
-          uv sync
+          uv sync --extra dev
 
       - name: Run linting
         working-directory: app/backend
         run: |
-          source .venv/bin/activate
-          flake8 app/
-          black --check app/
-          isort --check-only app/
+          uv run black --check app/
+          uv run ruff check app/
 
       - name: Run tests
         working-directory: app/backend
         run: |
-          source .venv/bin/activate
-          pytest --cov=app
+          uv run pytest --cov=app
 
   # Frontend tests
   frontend-test:

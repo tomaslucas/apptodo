@@ -1,25 +1,42 @@
-from sqlalchemy import Column, Integer, String, DateTime, Date, Text, ForeignKey, Index, JSON
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Date,
+    Text,
+    ForeignKey,
+    Index,
+    JSON,
+)
 from datetime import datetime
 from app.models.user import Base
 
 
 class Task(Base):
     """Modelo de Tarea."""
+
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     title = Column(String(255), nullable=False)
     description = Column(Text)
     priority = Column(String(20), default="media", nullable=False)  # baja, media, alta
     deadline = Column(Date)
-    status = Column(String(20), default="pendiente", nullable=False)  # pendiente, en_progreso, completada
+    status = Column(
+        String(20), default="pendiente", nullable=False
+    )  # pendiente, en_progreso, completada
     recurrence_rule = Column(String(255))
     completed_at = Column(DateTime)
     deleted_at = Column(DateTime)
     version = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
     # Índices
     __table_args__ = (
@@ -38,19 +55,22 @@ class Task(Base):
 
 class Category(Base):
     """Modelo de Categoría."""
+
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     name = Column(String(100), nullable=False)
     color = Column(String(20))
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
     # Índices
-    __table_args__ = (
-        Index("idx_categories_user_id", "user_id"),
-    )
+    __table_args__ = (Index("idx_categories_user_id", "user_id"),)
 
     def __repr__(self):
         return f"<Category {self.name}>"
@@ -58,10 +78,21 @@ class Category(Base):
 
 class TaskCategory(Base):
     """Modelo de relación Task-Category (M2M)."""
+
     __tablename__ = "task_categories"
 
-    task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True, nullable=False)
-    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    task_id = Column(
+        Integer,
+        ForeignKey("tasks.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    category_id = Column(
+        Integer,
+        ForeignKey("categories.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
 
     def __repr__(self):
         return f"<TaskCategory task_id={self.task_id}, category_id={self.category_id}>"
@@ -69,10 +100,13 @@ class TaskCategory(Base):
 
 class RefreshToken(Base):
     """Modelo de Refresh Token."""
+
     __tablename__ = "refresh_tokens"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     token_hash = Column(String(255), unique=True, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -89,11 +123,16 @@ class RefreshToken(Base):
 
 class TaskEvent(Base):
     """Modelo de Evento de Tarea (Auditoría)."""
+
     __tablename__ = "task_events"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    task_id = Column(
+        Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     event_type = Column(String(50), nullable=False)
     old_state = Column(JSON)
     new_state = Column(JSON)
@@ -114,10 +153,13 @@ class TaskEvent(Base):
 
 class IdempotencyKey(Base):
     """Modelo de Clave de Idempotencia."""
+
     __tablename__ = "idempotency_keys"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     idempotency_key = Column(String(255), unique=True, nullable=False)
     request_hash = Column(String(255))
     response_data = Column(JSON)

@@ -1,52 +1,55 @@
 <template>
   <Transition name="slide-down">
-    <div v-if="selectedCount > 0" class="batch-actions-bar">
+    <div
+      v-if="selectedCount > 0"
+      class="batch-actions-bar"
+    >
       <div class="batch-info">
         <span class="selected-count">{{ selectedCount }} selected</span>
       </div>
 
       <div class="batch-actions">
         <button
-          @click="completeSelected"
           class="btn-batch btn-batch-complete"
           :disabled="isLoading"
           title="Mark selected tasks as completed"
+          @click="completeSelected"
         >
           ✓ Complete
         </button>
 
         <button
-          @click="updatePriority"
           class="btn-batch btn-batch-priority"
           :disabled="isLoading"
           title="Update priority for selected tasks"
+          @click="updatePriority"
         >
           ⚡ Priority
         </button>
 
         <button
-          @click="updateStatus"
           class="btn-batch btn-batch-status"
           :disabled="isLoading"
           title="Update status for selected tasks"
+          @click="updateStatus"
         >
           📋 Status
         </button>
 
         <button
-          @click="deleteSelected"
           class="btn-batch btn-batch-delete"
           :disabled="isLoading"
           title="Delete selected tasks"
+          @click="deleteSelected"
         >
           🗑️ Delete
         </button>
 
         <button
-          @click="clearSelection"
           class="btn-batch btn-batch-clear"
           :disabled="isLoading"
           title="Clear selection"
+          @click="clearSelection"
         >
           ✕ Clear
         </button>
@@ -55,15 +58,19 @@
   </Transition>
 
   <!-- Priority Modal -->
-  <div v-if="showPriorityModal" class="modal-overlay" @click.self="showPriorityModal = false">
+  <div
+    v-if="showPriorityModal"
+    class="modal-overlay"
+    @click.self="showPriorityModal = false"
+  >
     <div class="modal-content">
       <h3>Update Priority</h3>
       <div class="priority-options">
         <button
           v-for="priority in ['low', 'medium', 'high']"
           :key="priority"
-          @click="setPriority(priority)"
           :class="['priority-btn', `priority-${priority}`]"
+          @click="setPriority(priority)"
         >
           {{ formatLabel(priority) }}
         </button>
@@ -72,15 +79,19 @@
   </div>
 
   <!-- Status Modal -->
-  <div v-if="showStatusModal" class="modal-overlay" @click.self="showStatusModal = false">
+  <div
+    v-if="showStatusModal"
+    class="modal-overlay"
+    @click.self="showStatusModal = false"
+  >
     <div class="modal-content">
       <h3>Update Status</h3>
       <div class="status-options">
         <button
           v-for="status in ['pending', 'in_progress', 'completed']"
           :key="status"
-          @click="setStatus(status)"
           :class="['status-btn', `status-${status}`]"
+          @click="setStatus(status)"
         >
           {{ formatLabel(status) }}
         </button>

@@ -1,4 +1,9 @@
-import { vi } from 'vitest'
+import { vi, beforeEach } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+
+beforeEach(() => {
+  setActivePinia(createPinia())
+})
 
 // Mock Tailwind CSS processing for components that use it
 global.CSS = {

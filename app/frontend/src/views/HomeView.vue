@@ -3,8 +3,18 @@
     <h1>Welcome to AppTodo</h1>
     <p>Organize your tasks efficiently</p>
     <div class="actions">
-      <router-link to="/login" class="btn btn-primary">Login</router-link>
-      <router-link to="/register" class="btn btn-secondary">Register</router-link>
+      <router-link
+        to="/login"
+        class="btn btn-primary"
+      >
+        Login
+      </router-link>
+      <router-link
+        to="/register"
+        class="btn btn-secondary"
+      >
+        Register
+      </router-link>
     </div>
   </div>
 </template>

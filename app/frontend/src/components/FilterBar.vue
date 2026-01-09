@@ -6,13 +6,21 @@
         <select
           id="status-filter"
           :value="taskStore.filters.status || ''"
-          @change="(e) => taskStore.setFilter('status', e.target.value || null)"
           name="status-filter"
+          @change="(e) => taskStore.setFilter('status', (e.target as HTMLSelectElement).value || null)"
         >
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
+          <option value="">
+            All Statuses
+          </option>
+          <option value="pending">
+            Pending
+          </option>
+          <option value="in_progress">
+            In Progress
+          </option>
+          <option value="completed">
+            Completed
+          </option>
         </select>
       </div>
 
@@ -21,13 +29,21 @@
         <select
           id="priority-filter"
           :value="taskStore.filters.priority || ''"
-          @change="(e) => taskStore.setFilter('priority', e.target.value || null)"
           name="priority-filter"
+          @change="(e) => taskStore.setFilter('priority', (e.target as HTMLSelectElement).value || null)"
         >
-          <option value="">All Priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option value="">
+            All Priorities
+          </option>
+          <option value="low">
+            Low
+          </option>
+          <option value="medium">
+            Medium
+          </option>
+          <option value="high">
+            High
+          </option>
         </select>
       </div>
 
@@ -36,11 +52,17 @@
         <select
           id="category-filter"
           :value="taskStore.filters.category_id || ''"
-          @change="(e) => taskStore.setFilter('category_id', e.target.value || null)"
           data-testid="category-filter"
+          @change="(e) => taskStore.setFilter('category_id', (e.target as HTMLSelectElement).value || null)"
         >
-          <option value="">All Categories</option>
-          <option v-for="category in categoryStore.categories" :key="category.id" :value="category.id">
+          <option value="">
+            All Categories
+          </option>
+          <option
+            v-for="category in categoryStore.categories"
+            :key="category.id"
+            :value="category.id"
+          >
             {{ category.name }}
           </option>
         </select>
@@ -53,30 +75,70 @@
           type="text"
           :value="taskStore.filters.search || ''"
           placeholder="Search tasks..."
-          @input="(e) => taskStore.setFilter('search', e.target.value || null)"
-        />
+          @input="(e) => taskStore.setFilter('search', (e.target as HTMLInputElement).value || null)"
+        >
       </div>
 
-      <button @click="clearAllFilters" class="btn-clear-filters">Clear All</button>
+      <button
+        class="btn-clear-filters"
+        @click="clearAllFilters"
+      >
+        Clear All
+      </button>
     </div>
 
-    <div v-if="hasActiveFilters" class="active-filters">
+    <div
+      v-if="hasActiveFilters"
+      class="active-filters"
+    >
       <span class="filters-label">Active filters:</span>
-      <div v-if="taskStore.filters.status" class="filter-tag">
+      <div
+        v-if="taskStore.filters.status"
+        class="filter-tag"
+      >
         Status: {{ formatLabel(taskStore.filters.status) }}
-        <button @click="clearFilter('status')" class="btn-remove">✕</button>
+        <button
+          class="btn-remove"
+          @click="clearFilter('status')"
+        >
+          ✕
+        </button>
       </div>
-      <div v-if="taskStore.filters.priority" class="filter-tag">
+      <div
+        v-if="taskStore.filters.priority"
+        class="filter-tag"
+      >
         Priority: {{ formatLabel(taskStore.filters.priority) }}
-        <button @click="clearFilter('priority')" class="btn-remove">✕</button>
+        <button
+          class="btn-remove"
+          @click="clearFilter('priority')"
+        >
+          ✕
+        </button>
       </div>
-      <div v-if="taskStore.filters.category_id" class="filter-tag">
+      <div
+        v-if="taskStore.filters.category_id"
+        class="filter-tag"
+      >
         Category: {{ getCategoryName(taskStore.filters.category_id) }}
-        <button @click="clearFilter('category_id')" class="btn-remove">✕</button>
+        <button
+          class="btn-remove"
+          @click="clearFilter('category_id')"
+        >
+          ✕
+        </button>
       </div>
-      <div v-if="taskStore.filters.search" class="filter-tag">
+      <div
+        v-if="taskStore.filters.search"
+        class="filter-tag"
+      >
         Search: "{{ taskStore.filters.search }}"
-        <button @click="clearFilter('search')" class="btn-remove">✕</button>
+        <button
+          class="btn-remove"
+          @click="clearFilter('search')"
+        >
+          ✕
+        </button>
       </div>
     </div>
   </div>

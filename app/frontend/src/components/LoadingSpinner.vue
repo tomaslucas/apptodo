@@ -5,8 +5,16 @@
     :aria-busy="true"
     :aria-label="label || 'Loading'"
   >
-    <div :class="spinnerClass" aria-hidden="true"></div>
-    <p v-if="label" :class="labelClass">{{ label }}</p>
+    <div
+      :class="spinnerClass"
+      aria-hidden="true"
+    />
+    <p
+      v-if="label"
+      :class="labelClass"
+    >
+      {{ label }}
+    </p>
   </div>
 </template>
 

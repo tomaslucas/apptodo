@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.core.database import get_db
@@ -6,14 +6,10 @@ from app.core.dependencies import get_current_user
 from app.schemas.task import (
     TaskCreateRequest,
     TaskUpdateRequest,
-    TaskResponse,
-    TaskListResponse,
     TaskCategoryRequest,
     BatchTaskRequest,
     BatchUpdateTaskRequest,
-    BatchOperationResponse,
     TaskEventResponse,
-    TaskEventsListResponse
 )
 from app.schemas.response import APIResponse
 from app.schemas.user import UserResponse
@@ -29,7 +25,7 @@ router = APIRouter(
 def create_task(
     request: TaskCreateRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Crear nueva tarea con idempotencia."""
     try:
@@ -41,23 +37,18 @@ def create_task(
             priority=request.priority,
             deadline=request.deadline,
             status=request.status,
-            recurrence_rule=request.recurrence_rule
+            recurrence_rule=request.recurrence_rule,
         )
-        
+
         return APIResponse(
-            status="success",
-            data={"task": task},
-            timestamp=datetime.utcnow()
+            status="success", data={"task": task}, timestamp=datetime.utcnow()
         )
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al crear tarea"
+            detail="Error al crear tarea",
         )
 
 
@@ -65,21 +56,18 @@ def create_task(
 def get_task(
     task_id: int,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Obtener tarea específica."""
     task = TaskService.get_task(db, task_id, current_user.id)
-    
+
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea no encontrada"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
         )
-    
+
     return APIResponse(
-        status="success",
-        data={"task": task},
-        timestamp=datetime.utcnow()
+        status="success", data={"task": task}, timestamp=datetime.utcnow()
     )
 
 
@@ -97,7 +85,7 @@ def list_tasks(
     limit: int = 1000,
     offset: int = 0,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Obtener todas las tareas del usuario con filtros avanzados."""
     # Parsear múltiples categorías (comma-separated list)
@@ -108,9 +96,9 @@ def list_tasks(
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid category IDs format"
+                detail="Invalid category IDs format",
             )
-    
+
     tasks = TaskService.get_user_tasks(
         db=db,
         user_id=current_user.id,
@@ -124,20 +112,16 @@ def list_tasks(
         completed=completed,
         include_deleted=include_deleted,
         limit=limit,
-        offset=offset
+        offset=offset,
     )
-    
+
     return APIResponse(
         status="success",
         data={
             "tasks": tasks,
-            "pagination": {
-                "total": len(tasks),
-                "limit": limit,
-                "offset": offset
-            }
+            "pagination": {"total": len(tasks), "limit": limit, "offset": offset},
         },
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
 
 
@@ -146,7 +130,7 @@ def update_task(
     task_id: int,
     request: TaskUpdateRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Actualizar tarea con optimistic locking."""
     try:
@@ -160,51 +144,39 @@ def update_task(
             deadline=request.deadline,
             status=request.status,
             recurrence_rule=request.recurrence_rule,
-            version=request.version
+            version=request.version,
         )
-        
+
         if not task:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Tarea no encontrada"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
             )
-        
+
         return APIResponse(
-            status="success",
-            data={"task": task},
-            timestamp=datetime.utcnow()
+            status="success", data={"task": task}, timestamp=datetime.utcnow()
         )
     except ValueError as e:
         if "Version mismatch" in str(e):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=str(e)
-            )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.delete("/{task_id}", response_model=APIResponse)
 def delete_task(
     task_id: int,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Soft delete de tarea."""
     task = TaskService.delete_task(db, task_id, current_user.id)
-    
+
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea no encontrada"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
         )
-    
+
     return APIResponse(
-        status="success",
-        data={"task": task},
-        timestamp=datetime.utcnow()
+        status="success", data={"task": task}, timestamp=datetime.utcnow()
     )
 
 
@@ -212,21 +184,18 @@ def delete_task(
 def restore_task(
     task_id: int,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Restaurar tarea eliminada."""
     task = TaskService.restore_task(db, task_id, current_user.id)
-    
+
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea no encontrada"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
         )
-    
+
     return APIResponse(
-        status="success",
-        data={"task": task},
-        timestamp=datetime.utcnow()
+        status="success", data={"task": task}, timestamp=datetime.utcnow()
     )
 
 
@@ -234,49 +203,47 @@ def restore_task(
 def complete_task(
     task_id: int,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Marcar tarea como completada."""
     task = TaskService.complete_task(db, task_id, current_user.id)
-    
+
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea no encontrada"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
         )
-    
+
     return APIResponse(
-        status="success",
-        data={"task": task},
-        timestamp=datetime.utcnow()
+        status="success", data={"task": task}, timestamp=datetime.utcnow()
     )
 
 
-@router.post("/{task_id}/categories", response_model=APIResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{task_id}/categories",
+    response_model=APIResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def add_category_to_task(
     task_id: int,
     request: TaskCategoryRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Agregar categoría a tarea."""
     success = TaskService.add_category_to_task(
-        db=db,
-        task_id=task_id,
-        user_id=current_user.id,
-        category_id=request.category_id
+        db=db, task_id=task_id, user_id=current_user.id, category_id=request.category_id
     )
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea o categoría no encontrada"
+            detail="Tarea o categoría no encontrada",
         )
-    
+
     return APIResponse(
         status="success",
         data={"message": "Categoría agregada a tarea"},
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
 
 
@@ -285,26 +252,23 @@ def remove_category_from_task(
     task_id: int,
     category_id: int,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Remover categoría de tarea."""
     success = TaskService.remove_category_from_task(
-        db=db,
-        task_id=task_id,
-        user_id=current_user.id,
-        category_id=category_id
+        db=db, task_id=task_id, user_id=current_user.id, category_id=category_id
     )
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea o categoría no encontrada"
+            detail="Tarea o categoría no encontrada",
         )
-    
+
     return APIResponse(
         status="success",
         data={"message": "Categoría removida de tarea"},
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
 
 
@@ -312,67 +276,49 @@ def remove_category_from_task(
 def batch_complete_tasks(
     request: BatchTaskRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Completar múltiples tareas."""
     result = TaskService.batch_complete_tasks(
-        db=db,
-        task_ids=request.task_ids,
-        user_id=current_user.id
+        db=db, task_ids=request.task_ids, user_id=current_user.id
     )
-    
-    return APIResponse(
-        status="success",
-        data=result,
-        timestamp=datetime.utcnow()
-    )
+
+    return APIResponse(status="success", data=result, timestamp=datetime.utcnow())
 
 
 @router.post("/batch/delete", response_model=APIResponse)
 def batch_delete_tasks(
     request: BatchTaskRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Eliminar múltiples tareas (soft delete)."""
     result = TaskService.batch_delete_tasks(
-        db=db,
-        task_ids=request.task_ids,
-        user_id=current_user.id
+        db=db, task_ids=request.task_ids, user_id=current_user.id
     )
-    
-    return APIResponse(
-        status="success",
-        data=result,
-        timestamp=datetime.utcnow()
-    )
+
+    return APIResponse(status="success", data=result, timestamp=datetime.utcnow())
 
 
 @router.post("/batch/restore", response_model=APIResponse)
 def batch_restore_tasks(
     request: BatchTaskRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Restaurar múltiples tareas eliminadas."""
     result = TaskService.batch_restore_tasks(
-        db=db,
-        task_ids=request.task_ids,
-        user_id=current_user.id
+        db=db, task_ids=request.task_ids, user_id=current_user.id
     )
-    
-    return APIResponse(
-        status="success",
-        data=result,
-        timestamp=datetime.utcnow()
-    )
+
+    return APIResponse(status="success", data=result, timestamp=datetime.utcnow())
 
 
 @router.patch("/batch/update", response_model=APIResponse)
 def batch_update_tasks(
     request: BatchUpdateTaskRequest,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Actualizar múltiples tareas."""
     result = TaskService.batch_update_tasks(
@@ -380,14 +326,10 @@ def batch_update_tasks(
         task_ids=request.task_ids,
         user_id=current_user.id,
         status=request.status,
-        priority=request.priority
+        priority=request.priority,
     )
-    
-    return APIResponse(
-        status="success",
-        data=result,
-        timestamp=datetime.utcnow()
-    )
+
+    return APIResponse(status="success", data=result, timestamp=datetime.utcnow())
 
 
 @router.get("/{task_id}/events", response_model=APIResponse)
@@ -396,36 +338,33 @@ def get_task_events(
     limit: int = 100,
     offset: int = 0,
     current_user: UserResponse = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Obtener historial de eventos (auditoría) de una tarea."""
     # Verificar que la tarea pertenece al usuario
     task = TaskService.get_task(db, task_id, current_user.id)
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tarea no encontrada"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
         )
-    
+
     # Obtener eventos
     from app.repositories.task import TaskEventRepository
+
     events, total = TaskEventRepository.get_task_events_paginated(
         db, task_id, limit=limit, offset=offset
     )
-    
+
     # Convertir a respuesta
     event_responses = [TaskEventResponse.from_orm(event) for event in events]
-    
+
     return APIResponse(
         status="success",
         data={
             "task_id": task_id,
             "events": event_responses,
             "total": total,
-            "pagination": {
-                "limit": limit,
-                "offset": offset
-            }
+            "pagination": {"limit": limit, "offset": offset},
         },
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )

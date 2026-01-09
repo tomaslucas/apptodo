@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Complete User Flow - AppTodo', () => {
-  let testUser = {
+  const testUser = {
     email: `test-${Date.now()}@example.com`,
     password: 'TestPassword123!',
     username: `testuser${Date.now()}`

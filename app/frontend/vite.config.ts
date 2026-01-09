@@ -30,6 +30,7 @@ export default defineConfig({
       jsdom: {
         url: 'http://localhost/'
       }
-    }
+    },
+    exclude: ['e2e/**', 'node_modules/**']
   }
 })

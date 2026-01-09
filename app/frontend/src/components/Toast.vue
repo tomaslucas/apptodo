@@ -1,5 +1,9 @@
 <template>
-  <Transition name="toast" @enter="onEnter" @leave="onLeave">
+  <Transition
+    name="toast"
+    @enter="onEnter"
+    @leave="onLeave"
+  >
     <div 
       v-if="isVisible"
       :class="containerClass"
@@ -8,19 +12,29 @@
       :aria-atomic="true"
     >
       <div :class="contentClass">
-        <div :class="iconClass" aria-hidden="true">
-          <component :is="iconComponent"></component>
+        <div
+          :class="iconClass"
+          aria-hidden="true"
+        >
+          <component :is="iconComponent" />
         </div>
         <div class="flex-1">
-          <p v-if="title" :class="titleClass">{{ title }}</p>
-          <p :class="messageClass">{{ message }}</p>
+          <p
+            v-if="title"
+            :class="titleClass"
+          >
+            {{ title }}
+          </p>
+          <p :class="messageClass">
+            {{ message }}
+          </p>
         </div>
         <button
           v-if="closeable"
           :class="closeButtonClass"
-          @click="close"
           aria-label="Close notification"
           type="button"
+          @click="close"
         >
           ×
         </button>

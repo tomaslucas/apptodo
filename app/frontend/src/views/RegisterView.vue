@@ -5,18 +5,37 @@
       <form @submit.prevent="handleRegister">
         <div class="form-group">
           <label for="name">Name</label>
-          <input v-model="name" type="text" id="name" required />
+          <input
+            id="name"
+            v-model="name"
+            type="text"
+            required
+          >
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input v-model="email" type="email" id="email" required />
-          <div v-if="emailError" class="error-message">
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            required
+          >
+          <div
+            v-if="emailError"
+            class="error-message"
+          >
             {{ emailError }}
           </div>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input v-model="password" type="password" id="password" required @input="validatePassword" />
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            required
+            @input="validatePassword"
+          >
           <div class="password-requirements">
             <div :class="['req-item', { met: passwordMet.length }]">
               {{ passwordMet.length ? '✓' : '○' }} At least 8 characters
@@ -31,20 +50,37 @@
         </div>
         <div class="form-group">
           <label for="confirm-password">Confirm Password</label>
-          <input v-model="confirmPassword" type="password" id="confirm-password" required />
+          <input
+            id="confirm-password"
+            v-model="confirmPassword"
+            type="password"
+            required
+          >
         </div>
-        <div v-if="passwordError" class="error-message">
+        <div
+          v-if="passwordError"
+          class="error-message"
+        >
           {{ passwordError }}
         </div>
-        <div v-if="authStore.error" class="error-message">
+        <div
+          v-if="authStore.error"
+          class="error-message"
+        >
           {{ authStore.error }}
         </div>
-        <button type="submit" :disabled="authStore.isLoading || !isFormValid" class="btn-submit">
+        <button
+          type="submit"
+          :disabled="authStore.isLoading || !isFormValid"
+          class="btn-submit"
+        >
           {{ authStore.isLoading ? 'Registering...' : 'Register' }}
         </button>
       </form>
       <p class="login-link">
-        Already have an account? <router-link to="/login">Login here</router-link>
+        Already have an account? <router-link to="/login">
+          Login here
+        </router-link>
       </p>
     </div>
   </div>

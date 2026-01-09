@@ -35,7 +35,7 @@ def health_check():
     return {
         "status": "ok",
         "version": settings.VERSION,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
@@ -48,17 +48,13 @@ def readiness_check():
             conn.execute("SELECT 1")
         return {
             "status": "ready",
-            "checks": {
-                "database": "ok"
-            },
-            "timestamp": datetime.utcnow().isoformat()
+            "checks": {"database": "ok"},
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         from fastapi import HTTPException
-        raise HTTPException(
-            status_code=503,
-            detail=f"Service unavailable: {str(e)}"
-        )
+
+        raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
 
 
 @app.get("/")
@@ -67,10 +63,11 @@ def root():
     return {
         "message": f"Welcome to {settings.PROJECT_NAME} API",
         "version": settings.VERSION,
-        "docs": "/docs"
+        "docs": "/docs",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

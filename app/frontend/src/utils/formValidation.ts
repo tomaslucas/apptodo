@@ -167,7 +167,7 @@ export const taskValidationRules: FieldValidation = {
   description: [validationRules.maxLength(2000, 'Description')],
   priority: [
     validationRules.required('Priority'),
-    validationRules.enum(['baja', 'media', 'alta'], 'Priority'),
+    validationRules.enum(['low', 'medium', 'high'], 'Priority'),
   ],
   deadline: [
     validationRules.validDate(),
@@ -178,7 +178,7 @@ export const taskValidationRules: FieldValidation = {
   ],
   status: [
     validationRules.required('Status'),
-    validationRules.enum(['pendiente', 'en_progreso', 'completada'], 'Status'),
+    validationRules.enum(['pending', 'in_progress', 'completed'], 'Status'),
   ],
 }
 

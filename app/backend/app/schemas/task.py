@@ -6,6 +6,7 @@ from enum import Enum
 
 class PriorityEnum(str, Enum):
     """Enumeración de prioridades."""
+
     baja = "baja"
     media = "media"
     alta = "alta"
@@ -13,6 +14,7 @@ class PriorityEnum(str, Enum):
 
 class StatusEnum(str, Enum):
     """Enumeración de estados de tarea."""
+
     pendiente = "pendiente"
     en_progreso = "en_progreso"
     completada = "completada"
@@ -20,6 +22,7 @@ class StatusEnum(str, Enum):
 
 class TaskCreateRequest(BaseModel):
     """Esquema para crear nueva tarea."""
+
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=2000)
     priority: Optional[PriorityEnum] = PriorityEnum.media
@@ -30,6 +33,7 @@ class TaskCreateRequest(BaseModel):
 
 class TaskUpdateRequest(BaseModel):
     """Esquema para actualizar tarea."""
+
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=2000)
     priority: Optional[PriorityEnum] = None
@@ -41,6 +45,7 @@ class TaskUpdateRequest(BaseModel):
 
 class TaskResponse(BaseModel):
     """Esquema de respuesta de tarea."""
+
     id: int
     user_id: int
     title: str
@@ -61,28 +66,33 @@ class TaskResponse(BaseModel):
 
 class TaskListResponse(BaseModel):
     """Esquema de respuesta de lista de tareas."""
+
     tasks: list[TaskResponse]
     pagination: Optional[dict] = None
 
 
 class TaskDetailResponse(BaseModel):
     """Esquema de respuesta detallada de tarea."""
+
     task: TaskResponse
     events: Optional[list] = None
 
 
 class TaskCategoryRequest(BaseModel):
     """Esquema para agregar/remover categoría a/de tarea."""
+
     category_id: int = Field(..., gt=0, description="ID de la categoría")
 
 
 class BatchTaskRequest(BaseModel):
     """Esquema para operaciones en batch."""
+
     task_ids: list[int] = Field(..., min_items=1, description="Lista de IDs de tareas")
 
 
 class BatchUpdateTaskRequest(BaseModel):
     """Esquema para actualizar múltiples tareas."""
+
     task_ids: list[int] = Field(..., min_items=1, description="Lista de IDs de tareas")
     status: Optional[StatusEnum] = None
     priority: Optional[PriorityEnum] = None
@@ -90,6 +100,7 @@ class BatchUpdateTaskRequest(BaseModel):
 
 class BatchOperationResponse(BaseModel):
     """Esquema de respuesta para operaciones en batch."""
+
     updated: int = Field(..., description="Cantidad de tareas actualizadas")
     total_requested: int = Field(..., description="Cantidad de tareas solicitadas")
     fields_updated: Optional[dict] = None
@@ -97,6 +108,7 @@ class BatchOperationResponse(BaseModel):
 
 class TaskEventResponse(BaseModel):
     """Esquema de respuesta para evento de tarea."""
+
     id: int
     task_id: int
     user_id: int
@@ -112,6 +124,7 @@ class TaskEventResponse(BaseModel):
 
 class TaskEventsListResponse(BaseModel):
     """Esquema de respuesta para lista de eventos."""
+
     task_id: int
     events: list[TaskEventResponse]
     total: int

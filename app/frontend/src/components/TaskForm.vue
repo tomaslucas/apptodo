@@ -1,51 +1,81 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+  <div
+    v-if="isOpen"
+    class="modal-overlay"
+    @click.self="closeModal"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
-        <button @click="closeModal" class="btn-close">✕</button>
+        <button
+          class="btn-close"
+          @click="closeModal"
+        >
+          ✕
+        </button>
       </div>
 
-      <form @submit.prevent="submitForm" class="task-form">
+      <form
+        class="task-form"
+        @submit.prevent="submitForm"
+      >
         <!-- Title Field -->
-        <div class="form-group" :class="{ 'has-error': getTitleError && fieldStates.value.title?.isTouched }">
+        <div
+          class="form-group"
+          :class="{ 'has-error': getTitleError && fieldStates.title?.isTouched }"
+        >
           <label for="title">
             Task Title
             <span class="required">*</span>
           </label>
           <input
+            id="title"
             v-model="formData.title"
             type="text"
-            id="title"
             placeholder="Enter task title"
+            :class="{ 'input-error': getTitleError && fieldStates.title?.isTouched }"
             @blur="handleFieldBlur('title')"
             @change="handleFieldChange('title', formData.title)"
-            :class="{ 'input-error': getTitleError && fieldStates.value.title?.isTouched }"
-          />
-          <div v-if="getTitleError && fieldStates.value.title?.isTouched" class="field-error">
+          >
+          <div
+            v-if="getTitleError && fieldStates.title?.isTouched"
+            class="field-error"
+          >
             {{ getTitleError }}
           </div>
-          <div v-if="!getTitleError && formData.title.length > 0" class="field-hint">
+          <div
+            v-if="!getTitleError && formData.title.length > 0"
+            class="field-hint"
+          >
             {{ formData.title.length }} / 255 characters
           </div>
         </div>
 
         <!-- Description Field -->
-        <div class="form-group" :class="{ 'has-error': getDescriptionError && fieldStates.value.description?.isTouched }">
+        <div
+          class="form-group"
+          :class="{ 'has-error': getDescriptionError && fieldStates.description?.isTouched }"
+        >
           <label for="description">Description</label>
           <textarea
-            v-model="formData.description"
             id="description"
+            v-model="formData.description"
             placeholder="Enter task description (optional)"
             rows="4"
+            :class="{ 'input-error': getDescriptionError && fieldStates.description?.isTouched }"
             @blur="handleFieldBlur('description')"
             @change="handleFieldChange('description', formData.description)"
-            :class="{ 'input-error': getDescriptionError && fieldStates.value.description?.isTouched }"
-          ></textarea>
-          <div v-if="getDescriptionError && fieldStates.value.description?.isTouched" class="field-error">
+          />
+          <div
+            v-if="getDescriptionError && fieldStates.description?.isTouched"
+            class="field-error"
+          >
             {{ getDescriptionError }}
           </div>
-          <div v-if="!getDescriptionError && formData.description.length > 0" class="field-hint">
+          <div
+            v-if="!getDescriptionError && formData.description.length > 0"
+            class="field-hint"
+          >
             {{ formData.description.length }} / 2000 characters
           </div>
         </div>
@@ -53,47 +83,70 @@
         <!-- Priority & Deadline Row -->
         <div class="form-row">
           <!-- Priority Field -->
-          <div class="form-group" :class="{ 'has-error': getPriorityError }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': getPriorityError }"
+          >
             <label for="priority">
               Priority
               <span class="required">*</span>
             </label>
             <select
-              v-model="formData.priority"
               id="priority"
+              v-model="formData.priority"
+              :class="{ 'input-error': getPriorityError }"
               @blur="handleFieldBlur('priority')"
               @change="handleFieldChange('priority', formData.priority)"
-              :class="{ 'input-error': getPriorityError }"
             >
-              <option value="">-- Select Priority --</option>
-              <option value="baja">Low</option>
-              <option value="media">Medium</option>
-              <option value="alta">High</option>
+              <option value="">
+                -- Select Priority --
+              </option>
+              <option value="baja">
+                Low
+              </option>
+              <option value="media">
+                Medium
+              </option>
+              <option value="alta">
+                High
+              </option>
             </select>
-            <div v-if="getPriorityError && fieldStates.value.priority?.isTouched" class="field-error">
+            <div
+              v-if="getPriorityError && fieldStates.priority?.isTouched"
+              class="field-error"
+            >
               {{ getPriorityError }}
             </div>
           </div>
 
           <!-- Deadline Field -->
-          <div class="form-group" :class="{ 'has-error': getDeadlineError && fieldStates.value.deadline?.isTouched }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': getDeadlineError && fieldStates.deadline?.isTouched }"
+          >
             <label for="deadline">Deadline</label>
             <input
+              id="deadline"
               v-model="formData.deadline"
               type="date"
-              id="deadline"
+              :class="{ 'input-error': getDeadlineError && fieldStates.deadline?.isTouched }"
               @blur="handleFieldBlur('deadline')"
               @change="handleFieldChange('deadline', formData.deadline)"
-              :class="{ 'input-error': getDeadlineError && fieldStates.value.deadline?.isTouched }"
-            />
-            <div v-if="getDeadlineError && fieldStates.value.deadline?.isTouched" class="field-error">
+            >
+            <div
+              v-if="getDeadlineError && fieldStates.deadline?.isTouched"
+              class="field-error"
+            >
               {{ getDeadlineError }}
             </div>
           </div>
         </div>
 
         <!-- Categories Field -->
-        <div class="form-group" :class="{ 'has-error': getCategoriesError }">
+        <div
+          class="form-group"
+          :class="{ 'has-error': getCategoriesError }"
+        >
           <label>
             Categories
             <span class="hint">(optional, max 10)</span>
@@ -102,40 +155,53 @@
           <!-- New category input -->
           <div class="category-input-wrapper">
             <input
-              type="text"
               v-model="newCategoryName"
+              type="text"
               placeholder="Type a category name and press Enter to create"
-              @keydown.enter.prevent="createNewCategory"
               class="category-input"
               :disabled="isCreatingCategory"
-            />
+              @keydown.enter.prevent="createNewCategory"
+            >
             <button
               type="button"
-              @click="createNewCategory"
               class="btn-add-category"
               :disabled="!newCategoryName.trim() || isCreatingCategory"
+              @click="createNewCategory"
             >
               {{ isCreatingCategory ? '...' : '+' }}
             </button>
           </div>
           
           <!-- Selected categories as tags -->
-          <div v-if="selectedCategoryNames.length > 0" class="selected-categories">
+          <div
+            v-if="selectedCategoryNames.length > 0"
+            class="selected-categories"
+          >
             <span
               v-for="cat in selectedCategoryNames"
               :key="cat.id"
               class="category-tag"
             >
               {{ cat.name }}
-              <button type="button" @click="removeCategory(cat.id)" class="tag-remove">×</button>
+              <button
+                type="button"
+                class="tag-remove"
+                @click="removeCategory(cat.id)"
+              >×</button>
             </span>
           </div>
           
           <div class="categories-select">
-            <div v-if="categoryStore.isLoading && !isCreatingCategory" class="categories-loading">
+            <div
+              v-if="categoryStore.isLoading && !isCreatingCategory"
+              class="categories-loading"
+            >
               Loading categories...
             </div>
-            <div v-else-if="categoryStore.categories.length === 0 && !isCreatingCategory" class="categories-empty">
+            <div
+              v-else-if="categoryStore.categories.length === 0 && !isCreatingCategory"
+              class="categories-empty"
+            >
               No categories yet. Type above to create your first category.
             </div>
             <template v-else>
@@ -145,57 +211,88 @@
                 class="category-checkbox"
               >
                 <input
-                  type="checkbox"
                   :id="`category-${category.id}`"
-                  :value="category.id"
                   v-model="formData.categories"
+                  type="checkbox"
+                  :value="category.id"
                   @change="handleFieldChange('categories', formData.categories)"
-                />
+                >
                 <label :for="`category-${category.id}`">{{ category.name }}</label>
               </div>
             </template>
           </div>
-          <div v-if="getCategoriesError && fieldStates.value.categories?.isTouched" class="field-error">
+          <div
+            v-if="getCategoriesError && fieldStates.categories?.isTouched"
+            class="field-error"
+          >
             {{ getCategoriesError }}
           </div>
-          <div v-if="formData.categories.length > 0" class="field-hint">
+          <div
+            v-if="formData.categories.length > 0"
+            class="field-hint"
+          >
             {{ formData.categories.length }} category(ies) selected
           </div>
         </div>
 
         <!-- Status Field -->
-        <div class="form-group" :class="{ 'has-error': getStatusError }">
+        <div
+          class="form-group"
+          :class="{ 'has-error': getStatusError }"
+        >
           <label for="status">
             Status
             <span class="required">*</span>
           </label>
           <select
-            v-model="formData.status"
             id="status"
+            v-model="formData.status"
+            :class="{ 'input-error': getStatusError }"
             @blur="handleFieldBlur('status')"
             @change="handleFieldChange('status', formData.status)"
-            :class="{ 'input-error': getStatusError }"
           >
-            <option value="">-- Select Status --</option>
-            <option value="pendiente">Pending</option>
-            <option value="en_progreso">In Progress</option>
-            <option value="completada">Completed</option>
+            <option value="">
+              -- Select Status --
+            </option>
+            <option value="pendiente">
+              Pending
+            </option>
+            <option value="en_progreso">
+              In Progress
+            </option>
+            <option value="completada">
+              Completed
+            </option>
           </select>
-          <div v-if="getStatusError && fieldStates.value.status?.isTouched" class="field-error">
+          <div
+            v-if="getStatusError && fieldStates.status?.isTouched"
+            class="field-error"
+          >
             {{ getStatusError }}
           </div>
         </div>
 
         <!-- API Error -->
-        <div v-if="apiError" class="error-message alert-error">
+        <div
+          v-if="apiError"
+          class="error-message alert-error"
+        >
           <strong>Error:</strong> {{ apiError }}
         </div>
 
         <!-- Validation Summary -->
-        <div v-if="hasValidationErrors && anyFieldTouched" class="validation-summary">
+        <div
+          v-if="hasValidationErrors && anyFieldTouched"
+          class="validation-summary"
+        >
           <strong>Please fix the following issues:</strong>
           <ul>
-            <li v-for="(error, idx) in validationErrorsList" :key="idx">{{ error }}</li>
+            <li
+              v-for="(error, idx) in validationErrorsList"
+              :key="idx"
+            >
+              {{ error }}
+            </li>
           </ul>
         </div>
 
@@ -209,7 +306,13 @@
           >
             {{ isLoading ? 'Saving...' : 'Save Task' }}
           </button>
-          <button type="button" @click="closeModal" class="btn-cancel">Cancel</button>
+          <button
+            type="button"
+            class="btn-cancel"
+            @click="closeModal"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>

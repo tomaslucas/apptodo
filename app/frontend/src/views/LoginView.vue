@@ -5,21 +5,40 @@
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">Email</label>
-          <input v-model="email" type="email" id="email" required />
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            required
+          >
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input v-model="password" type="password" id="password" required />
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            required
+          >
         </div>
-        <div v-if="authStore.error" class="error-message">
+        <div
+          v-if="authStore.error"
+          class="error-message"
+        >
           {{ authStore.error }}
         </div>
-        <button type="submit" :disabled="authStore.isLoading" class="btn-submit">
+        <button
+          type="submit"
+          :disabled="authStore.isLoading"
+          class="btn-submit"
+        >
           {{ authStore.isLoading ? 'Logging in...' : 'Login' }}
         </button>
       </form>
       <p class="register-link">
-        Don't have an account? <router-link to="/register">Register here</router-link>
+        Don't have an account? <router-link to="/register">
+          Register here
+        </router-link>
       </p>
     </div>
   </div>

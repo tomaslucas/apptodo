@@ -432,7 +432,7 @@ describe('useFormValidation Composable', () => {
         validateOnChange: true,
       })
 
-      let validationCount = 0
+      const validationCount = 0
       const originalValidate = form.validateSingleField
 
       // Make multiple changes in quick succession

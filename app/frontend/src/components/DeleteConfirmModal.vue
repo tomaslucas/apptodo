@@ -1,22 +1,40 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+  <div
+    v-if="isOpen"
+    class="modal-overlay"
+    @click.self="closeModal"
+  >
     <div class="modal-content">
       <div class="modal-header">
-        <div class="warning-icon">⚠️</div>
+        <div class="warning-icon">
+          ⚠️
+        </div>
         <h2>{{ title }}</h2>
       </div>
 
       <div class="modal-body">
         <p>{{ message }}</p>
-        <div v-if="details" class="details">
+        <div
+          v-if="details"
+          class="details"
+        >
           <strong>Details:</strong>
           <p>{{ details }}</p>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button @click="closeModal" class="btn-cancel">Cancel</button>
-        <button @click="confirmDelete" class="btn-delete" :disabled="isDeleting">
+        <button
+          class="btn-cancel"
+          @click="closeModal"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn-delete"
+          :disabled="isDeleting"
+          @click="confirmDelete"
+        >
           {{ isDeleting ? 'Deleting...' : 'Delete' }}
         </button>
       </div>

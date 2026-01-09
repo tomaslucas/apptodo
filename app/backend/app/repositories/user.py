@@ -11,11 +11,7 @@ class UserRepository:
     def create_user(db: Session, username: str, email: str, password: str) -> User:
         """Crear nuevo usuario."""
         hashed_password = hash_password(password)
-        user = User(
-            username=username,
-            email=email,
-            password_hash=hashed_password
-        )
+        user = User(username=username, email=email, password_hash=hashed_password)
         db.add(user)
         db.commit()
         db.refresh(user)

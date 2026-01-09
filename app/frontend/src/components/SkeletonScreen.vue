@@ -4,7 +4,7 @@
       v-for="i in count" 
       :key="i"
       :class="lineClass"
-    ></div>
+    />
   </div>
 </template>
 

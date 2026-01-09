@@ -63,9 +63,12 @@ class ShortcutsManager {
       // Check if this shortcut matches the current key combination
       if (this.matchesShortcut(shortcut)) {
         event.preventDefault()
-        shortcut.handler().catch((err) => {
-          console.error(`Shortcut ${shortcut.id} handler error:`, err)
-        })
+        const result = shortcut.handler()
+        if (result && typeof result.catch === 'function') {
+          result.catch((err) => {
+            console.error(`Shortcut ${shortcut.id} handler error:`, err)
+          })
+        }
         break // Execute only the first matching shortcut
       }
     }

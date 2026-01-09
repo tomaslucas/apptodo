@@ -2,7 +2,9 @@
   <div class="dashboard">
     <div class="dashboard-header">
       <h1>Dashboard</h1>
-      <p v-if="authStore.user">Welcome, {{ authStore.user.name }}</p>
+      <p v-if="authStore.user">
+        Welcome, {{ authStore.user.username }}
+      </p>
     </div>
     <div class="dashboard-content">
       <TaskList />

@@ -21,7 +21,7 @@ test.describe('Performance', () => {
         const observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
             if (!(entry as any).hadRecentInput) {
-              ;(window as any).layoutShiftCount = ((window as any).layoutShiftCount || 0) + 1
+              (window as any).layoutShiftCount = ((window as any).layoutShiftCount || 0) + 1
             }
           }
         })

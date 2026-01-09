@@ -31,7 +31,7 @@ export const useTaskStore = defineStore('task', () => {
     return tasks.value.filter((task) => {
       if (filters.value.status && task.status !== filters.value.status) return false
       if (filters.value.priority && task.priority !== filters.value.priority) return false
-      if (filters.value.category_id && task.category_id !== filters.value.category_id) return false
+      if (filters.value.category_id && !task.categories?.includes(filters.value.category_id)) return false
       if (filters.value.completed !== null && (task.status === 'completed') !== filters.value.completed)
         return false
       if (filters.value.search) {
@@ -118,7 +118,8 @@ export const useTaskStore = defineStore('task', () => {
   }
 
   const setFilter = (filterKey: string, value: any) => {
-    filters.value[filterKey as keyof typeof filters.value] = value
+    // @ts-ignore
+    filters.value[filterKey as keyof typeof filters.value] = value as any
   }
 
   const clearFilters = () => {

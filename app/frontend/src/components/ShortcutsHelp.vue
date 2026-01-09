@@ -1,43 +1,70 @@
 <template>
   <Transition name="fade">
-    <div v-if="isOpen" class="shortcuts-help-overlay" @click="closeModal">
-      <Transition name="scale" appear>
-        <div class="shortcuts-help-modal" @click.stop>
-      <div class="modal-header">
-        <h2>Keyboard Shortcuts</h2>
-        <button class="btn-close" @click="closeModal" title="Close (Esc)">×</button>
-      </div>
-
-      <div class="modal-content">
-        <div class="shortcuts-list">
-          <div v-for="(shortcut, index) in sortedShortcuts" :key="index" class="shortcut-item">
-            <div class="shortcut-keys">
-              <span
-                v-for="(key, keyIndex) in shortcut.keys"
-                :key="keyIndex"
-                :class="['key-badge', { 'special-key': isSpecialKey(key) }]"
-              >
-                {{ formatKeyName(key) }}
-              </span>
-            </div>
-            <div class="shortcut-description">{{ shortcut.description }}</div>
+    <div
+      v-if="isOpen"
+      class="shortcuts-help-overlay"
+      @click="closeModal"
+    >
+      <Transition
+        name="scale"
+        appear
+      >
+        <div
+          class="shortcuts-help-modal"
+          @click.stop
+        >
+          <div class="modal-header">
+            <h2>Keyboard Shortcuts</h2>
+            <button
+              class="btn-close"
+              title="Close (Esc)"
+              @click="closeModal"
+            >
+              ×
+            </button>
           </div>
-        </div>
 
-        <div class="shortcuts-info">
-          <p class="info-text">
-            <strong>Tip:</strong> Press <span class="key-badge">Cmd</span> (Mac) or
-            <span class="key-badge">Ctrl</span> (Windows/Linux) combined with other keys.
-          </p>
-          <p class="info-text">
-            Use <span class="key-badge">J</span> and <span class="key-badge">K</span> to navigate through tasks.
-          </p>
-        </div>
-      </div>
+          <div class="modal-content">
+            <div class="shortcuts-list">
+              <div
+                v-for="(shortcut, index) in sortedShortcuts"
+                :key="index"
+                class="shortcut-item"
+              >
+                <div class="shortcut-keys">
+                  <span
+                    v-for="(key, keyIndex) in shortcut.keys"
+                    :key="keyIndex"
+                    :class="['key-badge', { 'special-key': isSpecialKey(key) }]"
+                  >
+                    {{ formatKeyName(key) }}
+                  </span>
+                </div>
+                <div class="shortcut-description">
+                  {{ shortcut.description }}
+                </div>
+              </div>
+            </div>
 
-      <div class="modal-footer">
-        <button class="btn-close-modal" @click="closeModal">Close</button>
-      </div>
+            <div class="shortcuts-info">
+              <p class="info-text">
+                <strong>Tip:</strong> Press <span class="key-badge">Cmd</span> (Mac) or
+                <span class="key-badge">Ctrl</span> (Windows/Linux) combined with other keys.
+              </p>
+              <p class="info-text">
+                Use <span class="key-badge">J</span> and <span class="key-badge">K</span> to navigate through tasks.
+              </p>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              class="btn-close-modal"
+              @click="closeModal"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </Transition>
     </div>

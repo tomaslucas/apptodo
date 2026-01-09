@@ -2,24 +2,44 @@
   <div id="app">
     <nav class="navbar">
       <div class="nav-container">
-        <router-link to="/" class="logo">AppTodo</router-link>
+        <router-link
+          to="/"
+          class="logo"
+        >
+          AppTodo
+        </router-link>
         <ul class="nav-menu">
           <li v-if="!isAuthenticated">
-            <router-link to="/login">Login</router-link>
+            <router-link to="/login">
+              Login
+            </router-link>
           </li>
           <li v-if="!isAuthenticated">
-            <router-link to="/register">Register</router-link>
+            <router-link to="/register">
+              Register
+            </router-link>
           </li>
           <li v-if="isAuthenticated">
-            <router-link to="/dashboard">Dashboard</router-link>
+            <router-link to="/dashboard">
+              Dashboard
+            </router-link>
           </li>
           <li v-if="isAuthenticated">
-            <button @click="toggleShortcutsHelp" class="shortcuts-btn" title="Show shortcuts (Cmd+?)">
+            <button
+              class="shortcuts-btn"
+              title="Show shortcuts (Cmd+?)"
+              @click="toggleShortcutsHelp"
+            >
               ⌨️
             </button>
           </li>
           <li v-if="isAuthenticated">
-            <button @click="logout" class="logout-btn">Logout</button>
+            <button
+              class="logout-btn"
+              @click="logout"
+            >
+              Logout
+            </button>
           </li>
         </ul>
       </div>
@@ -28,7 +48,10 @@
       <router-view />
     </main>
     <ShortcutsHelp />
-    <div v-for="toast in toasts" :key="toast.id">
+    <div
+      v-for="toast in toasts"
+      :key="toast.id"
+    >
       <Toast
         :type="toast.type"
         :title="toast.title"

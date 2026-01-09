@@ -51,9 +51,9 @@ export function usePerformance() {
    * Monitor memory usage (Chrome only)
    */
   const updateMemoryMetrics = () => {
-    if (performance.memory) {
+    if ((performance as any).memory) {
       metrics.value.memory = Math.round(
-        performance.memory.usedJSHeapSize / 1048576
+        (performance as any).memory.usedJSHeapSize / 1048576
       ) // Convert to MB
     }
   }

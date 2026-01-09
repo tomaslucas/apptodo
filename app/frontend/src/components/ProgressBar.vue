@@ -1,9 +1,12 @@
 <template>
   <div :class="containerClass">
     <div :class="trackClass">
-      <div :class="barClass"></div>
+      <div :class="barClass" />
     </div>
-    <div v-if="showLabel" :class="labelClass">
+    <div
+      v-if="showLabel"
+      :class="labelClass"
+    >
       {{ percentage }}%
     </div>
   </div>

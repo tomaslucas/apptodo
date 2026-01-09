@@ -6,20 +6,27 @@
           type="checkbox"
           class="task-select-checkbox"
           :checked="isSelected"
-          @change="toggleSelection"
           data-testid="task-select-checkbox"
           title="Select task for batch operations"
-        />
+          @change="toggleSelection"
+        >
         <input
           type="checkbox"
           class="task-checkbox"
           :checked="task.status === 'completed'"
-          @change="toggleComplete"
           data-testid="task-checkbox"
-        />
+          @change="toggleComplete"
+        >
         <div class="task-title-section">
-          <h3 class="task-title">{{ task.title }}</h3>
-          <p v-if="task.description" class="task-description">{{ task.description }}</p>
+          <h3 class="task-title">
+            {{ task.title }}
+          </h3>
+          <p
+            v-if="task.description"
+            class="task-description"
+          >
+            {{ task.description }}
+          </p>
         </div>
       </div>
       <div class="task-badges">
@@ -30,24 +37,48 @@
 
     <div class="task-item-meta">
       <div class="categories">
-        <span v-for="categoryId in task.categories || []" :key="categoryId" class="category-badge">
+        <span
+          v-for="categoryId in task.categories || []"
+          :key="categoryId"
+          class="category-badge"
+        >
           {{ getCategoryName(categoryId) }}
         </span>
-        <button v-if="showActions" @click="openCategoryModal" class="btn-add-category" title="Add category">
+        <button
+          v-if="showActions"
+          class="btn-add-category"
+          title="Add category"
+          @click="openCategoryModal"
+        >
           +
         </button>
       </div>
 
-      <div class="task-deadline" v-if="task.deadline">
+      <div
+        v-if="task.deadline"
+        class="task-deadline"
+      >
         <span class="deadline-label">{{ formatDeadline(task.deadline) }}</span>
       </div>
     </div>
 
-    <div v-if="showActions" class="task-item-actions">
-      <button @click="editTask" class="btn-action btn-edit" title="Edit task">
+    <div
+      v-if="showActions"
+      class="task-item-actions"
+    >
+      <button
+        class="btn-action btn-edit"
+        title="Edit task"
+        @click="editTask"
+      >
         ✏️
       </button>
-      <button @click="deleteTask" class="btn-action btn-delete" data-testid="delete-btn" title="Delete task">
+      <button
+        class="btn-action btn-delete"
+        data-testid="delete-btn"
+        title="Delete task"
+        @click="deleteTask"
+      >
         🗑️
       </button>
     </div>

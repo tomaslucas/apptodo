@@ -14,16 +14,18 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./app.db"
 
     # JWT
-    SECRET_KEY: str = os.getenv(
-        "SECRET_KEY",
-        "your-secret-key-change-in-production"
-    )
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # CORS
-    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"]
+    CORS_ORIGINS: list = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+    ]
 
     # Password hashing
     PASSWORD_MIN_LENGTH: int = 8
