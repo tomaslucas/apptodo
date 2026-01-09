@@ -3,9 +3,11 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 
 interface User {
-  id: string
+  id: string | number
   email: string
-  name: string
+  username: string
+  created_at?: string
+  updated_at?: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -31,34 +33,59 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = newUser
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (userEmail: string, userPassword: string) => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.post('/api/v1/auth/login', { email, password })
-      const { token: newToken, user: newUser } = response.data
-      setToken(newToken)
-      setUser(newUser)
+      const response = await axios.post('/api/v1/auth/login', { 
+        email: userEmail, 
+        password: userPassword 
+      })
+      
+      // Backend returns: { status, data: { access_token, token_type, user }, error, timestamp }
+      const accessToken = response.data.data.access_token
+      const userData = response.data.data.user
+      
+      if (!accessToken || !userData) {
+        throw new Error('Invalid response from server')
+      }
+      
+      setToken(accessToken)
+      setUser(userData)
       return true
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Login failed'
+      const errorMsg = err instanceof Error ? err.message : 'Login failed'
+      error.value = errorMsg
+      console.error('Login error:', errorMsg)
       return false
     } finally {
       isLoading.value = false
     }
   }
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (userEmail: string, userPassword: string, username: string) => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.post('/api/v1/auth/register', { email, password, name })
-      const { token: newToken, user: newUser } = response.data
-      setToken(newToken)
-      setUser(newUser)
+      const response = await axios.post('/api/v1/auth/register', { 
+        email: userEmail, 
+        password: userPassword, 
+        username 
+      })
+      
+      // Backend returns: { status, data: { user }, error, timestamp }
+      const userData = response.data.data.user
+      
+      if (!userData) {
+        throw new Error('Registration failed')
+      }
+      
+      // After registration, user should login
       return true
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Registration failed'
+      const errorMsg = err instanceof Error ? err.message : 'Registration failed'
+      error.value = errorMsg
+      console.error('Register error:', errorMsg)
       return false
     } finally {
       isLoading.value = false
