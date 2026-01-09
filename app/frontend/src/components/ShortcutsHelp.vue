@@ -112,123 +112,225 @@ const closeModal = () => {
 
 <style scoped>
 .shortcuts-help-overlay {
-   @apply fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
 }
 
 .shortcuts-help-modal {
-   @apply bg-white rounded-xl shadow-large max-w-2xl w-11/12 flex flex-col overflow-hidden;
-   max-height: 80vh;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 42rem;
+  width: 91.666667%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 80vh;
 }
 
 .modal-header {
-  @apply flex justify-between items-center px-6 py-4 border-b border-gray-200 flex-shrink-0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
-  @apply m-0 text-2xl text-gray-900 font-semibold;
+  margin: 0;
+  font-size: 1.5rem;
+  color: #111827;
+  font-weight: 600;
 }
 
 .btn-close {
-  @apply bg-none border-none text-3xl text-gray-400 cursor-pointer p-0;
-  @apply w-10 h-10 flex items-center justify-center transition-colors hover:text-gray-900;
+  background: none;
+  border: none;
+  font-size: 1.875rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s;
+}
+
+.btn-close:hover {
+  color: #111827;
 }
 
 .modal-content {
-  @apply overflow-y-auto flex-1 px-6 py-6;
+  overflow-y: auto;
+  flex: 1;
+  padding: 1.5rem;
 }
 
 .shortcuts-list {
-  @apply grid gap-4 mb-8;
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .shortcut-item {
-  @apply flex items-center gap-6 p-4 bg-gray-50 rounded-lg border border-gray-100;
-  @apply transition-all hover:bg-gray-100 hover:border-gray-200 hover:shadow-soft;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #f3f4f6;
+  transition: all 0.3s;
+}
+
+.shortcut-item:hover {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .shortcut-keys {
-  @apply flex gap-2 flex-shrink-0 min-w-max;
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+  flex-wrap: wrap;
 }
 
 .key-badge {
-  @apply inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-300 rounded;
-  @apply text-xs font-semibold text-gray-900 font-mono shadow-soft;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111827;
+  font-family: 'Monaco', 'Courier New', monospace;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .key-badge.special-key {
-  @apply bg-gray-100 text-gray-700 border-gray-400;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-color: #9ca3af;
 }
 
 .shortcut-description {
-  @apply flex-1 text-gray-700 text-sm leading-relaxed;
+  flex: 1;
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .shortcuts-info {
-  @apply bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
 
 .info-text {
-  @apply my-2 text-blue-900 text-sm leading-relaxed;
+  margin: 0.5rem 0;
+  color: #1e3a8a;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .info-text strong {
-  @apply font-semibold;
+  font-weight: 600;
 }
 
 .info-text .key-badge {
-  @apply inline-flex px-2 py-1 text-xs mx-1;
+  display: inline-flex;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  margin: 0 0.25rem;
 }
 
 .modal-footer {
-  @apply px-6 py-4 border-t border-gray-200 flex justify-end flex-shrink-0;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .btn-close-modal {
-  @apply px-6 py-2 bg-blue-600 text-white border-none rounded font-semibold cursor-pointer;
-  @apply transition-colors hover:bg-blue-700 text-base;
+  padding: 0.5rem 1.5rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.btn-close-modal:hover {
+  background-color: #1d4ed8;
 }
 
 /* Scrollbar styling */
 .modal-content::-webkit-scrollbar {
-  @apply w-2;
+  width: 0.5rem;
 }
 
 .modal-content::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background-color: transparent;
 }
 
 .modal-content::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded;
+  background-color: #d1d5db;
+  border-radius: 0.25rem;
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  background-color: #9ca3af;
 }
 
 @media (max-width: 640px) {
-   .shortcuts-help-modal {
-     @apply w-11/12;
-     max-height: 83.33vh;
-   }
+  .shortcuts-help-modal {
+    width: 91.666667%;
+    max-height: 83.33vh;
+  }
 
   .shortcut-item {
-    @apply flex-col items-start gap-3;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 
   .shortcut-keys {
-    @apply min-w-auto flex-wrap;
+    min-width: auto;
+    flex-wrap: wrap;
   }
 
   .modal-header {
-    @apply px-4 py-3;
+    padding: 1rem;
   }
 
   .modal-content {
-    @apply px-4 py-4;
+    padding: 1rem;
   }
 
   .modal-footer {
-    @apply px-4 py-3;
+    padding: 1rem;
   }
 }
 </style>
