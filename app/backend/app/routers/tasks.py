@@ -161,6 +161,42 @@ def update_task(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
+@router.patch("/{task_id}", response_model=APIResponse)
+def patch_task(
+    task_id: int,
+    request: TaskUpdateRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Actualizar tarea parcialmente con optimistic locking."""
+    try:
+        task = TaskService.update_task(
+            db=db,
+            task_id=task_id,
+            user_id=current_user.id,
+            title=request.title,
+            description=request.description,
+            priority=request.priority,
+            deadline=request.deadline,
+            status=request.status,
+            recurrence_rule=request.recurrence_rule,
+            version=request.version,
+        )
+
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
+            )
+
+        return APIResponse(
+            status="success", data={"task": task}, timestamp=datetime.utcnow()
+        )
+    except ValueError as e:
+        if "Version mismatch" in str(e):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
 @router.delete("/{task_id}", response_model=APIResponse)
 def delete_task(
     task_id: int,

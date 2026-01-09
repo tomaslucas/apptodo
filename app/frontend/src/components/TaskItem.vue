@@ -1,86 +1,96 @@
 <template>
-  <div :class="['task-item', { completed: task.status === 'completed', selected: isSelected }]">
-    <div class="task-item-header">
-      <div class="task-checkbox-title">
-        <input
-          type="checkbox"
-          class="task-select-checkbox"
-          :checked="isSelected"
-          data-testid="task-select-checkbox"
-          title="Select task for batch operations"
-          @change="toggleSelection"
-        >
-        <input
-          type="checkbox"
-          class="task-checkbox"
-          :checked="task.status === 'completed'"
-          data-testid="task-checkbox"
-          @change="toggleComplete"
-        >
-        <div class="task-title-section">
-          <h3 class="task-title">
-            {{ task.title }}
-          </h3>
-          <p
-            v-if="task.description"
-            class="task-description"
-          >
-            {{ task.description }}
-          </p>
-        </div>
-      </div>
-      <div class="task-badges">
-        <span :class="['priority-badge', `priority-${task.priority}`]">{{ formatLabel(task.priority) }}</span>
-        <span :class="['status-badge', `status-${task.status}`]">{{ formatLabel(task.status) }}</span>
-      </div>
+  <div :class="['task-item', { completed: task.status === 'completada', selected: isSelected }]">
+    <div class="task-selection-column">
+      <input
+        type="checkbox"
+        class="task-select-checkbox"
+        :checked="isSelected"
+        data-testid="task-select-checkbox"
+        title="Select for batch actions"
+        @change="toggleSelection"
+      >
     </div>
 
-    <div class="task-item-meta">
-      <div class="categories">
-        <span
-          v-for="categoryId in task.categories || []"
-          :key="categoryId"
-          class="category-badge"
+    <div class="task-main-content">
+      <div class="task-item-header">
+        <div class="task-checkbox-title">
+          <input
+            type="checkbox"
+            class="task-completion-checkbox"
+            :checked="task.status === 'completada'"
+            data-testid="task-checkbox"
+            title="Mark as completed"
+            @change="toggleComplete"
+          >
+          <div class="task-title-section">
+            <h3 class="task-title">
+              {{ task.title }}
+            </h3>
+            <p
+              v-if="task.description"
+              class="task-description"
+            >
+              {{ task.description }}
+            </p>
+          </div>
+        </div>
+        <div class="task-badges">
+          <span :class="['priority-badge', `priority-${task.priority}`]">{{ formatLabel(task.priority) }}</span>
+          <span :class="['status-badge', `status-${task.status}`]">{{ formatLabel(task.status) }}</span>
+        </div>
+      </div>
+
+      <div class="task-item-meta">
+        <div class="categories">
+          <span
+            v-for="categoryId in task.categories || []"
+            :key="categoryId"
+            class="category-badge"
+          >
+            {{ getCategoryName(categoryId) }}
+          </span>
+          <button
+            v-if="showActions"
+            class="btn-add-category"
+            title="Add category"
+            @click="openCategoryModal"
+          >
+            <span class="plus-icon">+</span>
+            <span
+              v-if="!(task.categories && task.categories.length > 0)"
+              class="btn-text"
+            >Add Category</span>
+          </button>
+        </div>
+
+        <div
+          v-if="task.deadline"
+          class="task-deadline"
         >
-          {{ getCategoryName(categoryId) }}
-        </span>
-        <button
-          v-if="showActions"
-          class="btn-add-category"
-          title="Add category"
-          @click="openCategoryModal"
-        >
-          +
-        </button>
+          <span class="deadline-label">📅 {{ formatDeadline(task.deadline) }}</span>
+        </div>
       </div>
 
       <div
-        v-if="task.deadline"
-        class="task-deadline"
+        v-if="showActions"
+        class="task-item-actions"
       >
-        <span class="deadline-label">{{ formatDeadline(task.deadline) }}</span>
+        <button
+          class="btn-action btn-edit"
+          title="Edit task"
+          @click="editTask"
+        >
+          ✏️ Edit
+        </button>
+        <button
+          class="btn-action btn-delete"
+          data-testid="delete-btn"
+          title="Delete task"
+          @click="deleteTask"
+        >
+          🗑️ Delete
+        </button>
       </div>
-    </div>
-
-    <div
-      v-if="showActions"
-      class="task-item-actions"
-    >
-      <button
-        class="btn-action btn-edit"
-        title="Edit task"
-        @click="editTask"
-      >
-        ✏️
-      </button>
-      <button
-        class="btn-action btn-delete"
-        data-testid="delete-btn"
-        title="Delete task"
-        @click="deleteTask"
-      >
-        🗑️
-      </button>
     </div>
   </div>
 </template>
@@ -143,7 +153,8 @@ const getCategoryName = (categoryId: string): string => {
 }
 
 const toggleComplete = async () => {
-  const newStatus = props.task.status === 'completed' ? 'pending' : 'completed'
+  const newStatus = props.task.status === 'completada' ? 'pendiente' : 'completada'
+  // Use patch in the store which now works with backend
   await taskStore.updateTask(props.task.id, { status: newStatus })
   emit('updateStatus', props.task.id, newStatus)
 }
@@ -170,40 +181,53 @@ const openCategoryModal = () => {
 .task-item {
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1rem;
   margin-bottom: 0.75rem;
   transition: all 0.2s ease;
+  display: flex;
+  gap: 1rem;
 }
 
 .task-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-color: #d0d0d0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e0;
 }
 
 .task-item.completed {
-  background-color: #f5f5f5;
-  opacity: 0.7;
+  background-color: #f8fafc;
+  opacity: 0.8;
 }
 
 .task-item.completed .task-title {
   text-decoration: line-through;
-  color: #999;
+  color: #718096;
 }
 
 .task-item.selected {
-  background-color: #f0f4ff;
+  background-color: #ebf4ff;
   border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 1px #667eea;
+}
+
+.task-selection-column {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.25rem;
+  border-right: 1px solid #edf2f7;
+  padding-right: 1rem;
 }
 
 .task-select-checkbox {
-  margin-top: 0.25rem;
   cursor: pointer;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
   accent-color: #667eea;
+  border-radius: 4px;
+}
+
+.task-main-content {
+  flex: 1;
 }
 
 .task-item-header {
@@ -220,12 +244,13 @@ const openCategoryModal = () => {
   flex: 1;
 }
 
-.task-checkbox {
+.task-completion-checkbox {
   margin-top: 0.25rem;
   cursor: pointer;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  accent-color: #48bb78;
 }
 
 .task-title-section {
@@ -234,16 +259,16 @@ const openCategoryModal = () => {
 
 .task-title {
   margin: 0;
-  font-size: 1.05rem;
-  color: #333;
-  font-weight: 500;
+  font-size: 1.1rem;
+  color: #2d3748;
+  font-weight: 600;
 }
 
 .task-description {
   margin: 0.25rem 0 0 0;
-  font-size: 0.9rem;
-  color: #666;
-  line-height: 1.4;
+  font-size: 0.95rem;
+  color: #4a5568;
+  line-height: 1.5;
 }
 
 .task-badges {
@@ -254,50 +279,58 @@ const openCategoryModal = () => {
 
 .priority-badge,
 .status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
   white-space: nowrap;
 }
 
 .priority-low {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #f0fff4;
+  color: #2f855a;
+  border: 1px solid #c6f6d5;
 }
 
 .priority-medium {
-  background-color: #fff3e0;
-  color: #e65100;
+  background-color: #fffaf0;
+  color: #c05621;
+  border: 1px solid #feebc8;
 }
 
 .priority-high {
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: #fff5f5;
+  color: #c53030;
+  border: 1px solid #fed7d7;
 }
 
 .status-pending {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  background-color: #ebf8ff;
+  color: #2b6cb0;
+  border: 1px solid #bee3f8;
 }
 
 .status-in_progress {
-  background-color: #f3e5f5;
-  color: #6a1b9a;
+  background-color: #faf5ff;
+  color: #6b46c1;
+  border: 1px solid #e9d8fd;
 }
 
 .status-completed {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #f0fff4;
+  color: #2f855a;
+  border: 1px solid #c6f6d5;
 }
 
 .task-item-meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
   font-size: 0.9rem;
-  color: #666;
+  color: #718096;
   flex-wrap: wrap;
 }
 
@@ -310,29 +343,38 @@ const openCategoryModal = () => {
 
 .category-badge {
   display: inline-block;
-  background-color: #e0e0e0;
-  color: #333;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
+  background-color: #edf2f7;
+  color: #4a5568;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
   font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .btn-add-category {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px dashed #cbd5e0;
   border-radius: 4px;
-  background: white;
-  color: #666;
+  background: transparent;
+  color: #718096;
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.2s;
 }
 
 .btn-add-category:hover {
-  background-color: #f5f5f5;
-  border-color: #999;
+  background-color: #f7fafc;
+  border-color: #a0aec0;
+  color: #4a5568;
+}
+
+.plus-icon {
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .task-deadline {
@@ -342,35 +384,44 @@ const openCategoryModal = () => {
 .deadline-label {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background-color: #f5f5f5;
+  background-color: #f7fafc;
+  border: 1px solid #edf2f7;
   border-radius: 4px;
   font-size: 0.85rem;
 }
 
 .task-item-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   justify-content: flex-end;
+  border-top: 1px solid #edf2f7;
+  padding-top: 0.75rem;
 }
 
 .btn-action {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.4rem 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
   background: white;
+  color: #4a5568;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   transition: all 0.2s;
 }
 
 .btn-action:hover {
-  background-color: #f5f5f5;
-  border-color: #999;
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
 }
 
 .btn-delete:hover {
-  background-color: #ffebee;
-  border-color: #c62828;
+  background-color: #fff5f5;
+  border-color: #feb2b2;
+  color: #c53030;
 }
 
 @media (max-width: 768px) {
@@ -380,12 +431,13 @@ const openCategoryModal = () => {
 
   .task-badges {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   .task-item-meta {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.75rem;
   }
 }
 </style>

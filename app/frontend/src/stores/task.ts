@@ -6,8 +6,8 @@ export interface Task {
   id: string
   title: string
   description?: string
-  status: 'pending' | 'in_progress' | 'completed'
-  priority: 'low' | 'medium' | 'high'
+  status: 'pendiente' | 'en_progreso' | 'completada'
+  priority: 'baja' | 'media' | 'alta'
   deadline?: string
   categories?: string[]
   created_at: string
@@ -32,7 +32,7 @@ export const useTaskStore = defineStore('task', () => {
       if (filters.value.status && task.status !== filters.value.status) return false
       if (filters.value.priority && task.priority !== filters.value.priority) return false
       if (filters.value.category_id && !task.categories?.includes(filters.value.category_id)) return false
-      if (filters.value.completed !== null && (task.status === 'completed') !== filters.value.completed)
+      if (filters.value.completed !== null && (task.status === 'completada') !== filters.value.completed)
         return false
       if (filters.value.search) {
         const search = filters.value.search.toLowerCase()
@@ -166,7 +166,7 @@ export const useTaskStore = defineStore('task', () => {
       taskIds.forEach((taskId) => {
         const index = tasks.value.findIndex((t) => t.id === taskId)
         if (index !== -1) {
-          tasks.value[index].status = 'completed'
+          tasks.value[index].status = 'completada'
         }
       })
       

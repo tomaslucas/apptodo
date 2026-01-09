@@ -40,7 +40,7 @@ class TaskUpdateRequest(BaseModel):
     deadline: Optional[date] = None
     status: Optional[StatusEnum] = None
     recurrence_rule: Optional[str] = None
-    version: int  # Para optimistic locking
+    version: Optional[int] = None  # Para optimistic locking
 
 
 class TaskResponse(BaseModel):
