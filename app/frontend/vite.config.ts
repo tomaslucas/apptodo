@@ -17,5 +17,19 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: [],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html']
+    },
+    environmentOptions: {
+      jsdom: {
+        url: 'http://localhost/'
+      }
+    }
   }
 })

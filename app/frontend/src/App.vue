@@ -28,6 +28,16 @@
       <router-view />
     </main>
     <ShortcutsHelp />
+    <div v-for="toast in toasts" :key="toast.id">
+      <Toast
+        :type="toast.type"
+        :title="toast.title"
+        :message="toast.message"
+        :duration="toast.duration"
+        :closeable="toast.closeable"
+        @close="removeToast(toast.id)"
+      />
+    </div>
   </div>
 </template>
 
@@ -37,12 +47,15 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useUIStore } from './stores/ui'
 import { useShortcuts } from './utils/shortcutsManager'
+import { useToast } from './composables/useToast'
 import ShortcutsHelp from './components/ShortcutsHelp.vue'
+import Toast from './components/Toast.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 const { register, unregister, start, stop } = useShortcuts()
+const { toasts, removeToast } = useToast()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 
