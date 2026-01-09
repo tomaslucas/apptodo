@@ -1,46 +1,11 @@
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from app.main import app
-from app.core.database import Base, get_db
-from app.models.user import User
-from app.models.task import Task, Category, TaskCategory, RefreshToken, TaskEvent, IdempotencyKey
-import time
-from datetime import datetime, timedelta
-
-
-# Crear base de datos en memoria para testing
-SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
-
-engine = create_engine(
-    SQLALCHEMY_TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-client = TestClient(app)
+from datetime import timedelta
 
 
 class TestSQLInjection:
     """Tests para prevenir SQL Injection."""
 
-    def test_sql_injection_in_login(self):
+    def test_sql_injection_in_login(self, client):
         """SQL injection en login no debe funcionar."""
         # Intentar SQL injection en email
         response = client.post(
@@ -50,17 +15,11 @@ class TestSQLInjection:
                 "password": "password"
             }
         )
-        
+
         # Debería retornar 401 o 422, pero no ejecutar SQL
         assert response.status_code in [401, 422]
-        
-        # Verificar que la tabla de usuarios sigue existiendo
-        db = TestingSessionLocal()
-        users = db.query(User).all()
-        assert len(users) >= 0  # La tabla sigue existiendo
-        db.close()
 
-    def test_sql_injection_in_register(self):
+    def test_sql_injection_in_register(self, client):
         """SQL injection en register no debe funcionar."""
         # Intentar SQL injection en username
         response = client.post(
@@ -71,21 +30,15 @@ class TestSQLInjection:
                 "password": "SecurePass123"
             }
         )
-        
+
         # Debería retornar 422 (validación) o error, pero no ejecutar SQL
         assert response.status_code in [422, 400, 201]
-        
-        # Tabla de usuarios sigue existiendo
-        db = TestingSessionLocal()
-        users = db.query(User).all()
-        assert len(users) >= 0
-        db.close()
 
 
 class TestXSSPrevention:
     """Tests para prevenir Cross-Site Scripting (XSS)."""
 
-    def test_xss_payload_accepted_in_request(self):
+    def test_xss_payload_accepted_in_request(self, client):
         """XSS payloads deben ser aceptados en requests (y sanitizados en BD)."""
         # Registrar con payload XSS
         xss_payload = "<script>alert('xss')</script>"
@@ -101,7 +54,7 @@ class TestXSSPrevention:
         # El registro debe funcionar con datos limpios
         assert response.status_code == 201
 
-    def test_xss_in_email_validation(self):
+    def test_xss_in_email_validation(self, client):
         """Email con XSS payload debe ser rechazado."""
         response = client.post(
             "/api/v1/auth/register",
@@ -119,7 +72,7 @@ class TestXSSPrevention:
 class TestPathTraversal:
     """Tests para prevenir Path Traversal attacks."""
 
-    def test_path_traversal_validation(self):
+    def test_path_traversal_validation(self, client):
         """Verificar que validación de parámetros previene path traversal."""
         # Intentar acceder a ruta con path traversal sin autenticación
         response = client.get("/api/v1/tasks/../../../../etc/passwd")
@@ -131,7 +84,7 @@ class TestPathTraversal:
 class TestRateLimiting:
     """Tests para verificar rate limiting."""
 
-    def test_rate_limiting_on_login_endpoint(self):
+    def test_rate_limiting_on_login_endpoint(self, client):
         """Rate limiting debe prevenir fuerza bruta en login."""
         # Realizar múltiples intentos de login fallidos
         failed_attempts = 0
@@ -157,7 +110,7 @@ class TestRateLimiting:
         # Si no hay rate limiting, esta prueba verifica que al menos podemos intentar múltiples veces
         assert failed_attempts >= 0  # Flexible para diferentes estrategias de rate limiting
 
-    def test_rate_limiting_on_register_endpoint(self):
+    def test_rate_limiting_on_register_endpoint(self, client):
         """Rate limiting debe prevenir spam de registros."""
         responses_429 = 0
         
@@ -181,14 +134,14 @@ class TestRateLimiting:
 class TestAuthBypass:
     """Tests para prevenir auth bypass."""
 
-    def test_auth_bypass_without_token(self):
+    def test_auth_bypass_without_token(self, client):
         """Endpoints protegidos sin token deben retornar 401."""
         response = client.get("/api/v1/tasks")
         assert response.status_code == 401
         detail_lower = response.json()["detail"].lower()
         assert "authorization" in detail_lower or "token" in detail_lower
 
-    def test_auth_bypass_with_expired_token(self):
+    def test_auth_bypass_with_expired_token(self, client):
         """Token expirado debe retornar 401."""
         # Crear un token expirado manualmente
         from app.core.security import create_access_token
@@ -207,7 +160,7 @@ class TestAuthBypass:
         assert response.status_code == 401
         assert "token" in response.json()["detail"].lower() or "expired" in response.json()["detail"].lower()
 
-    def test_auth_bypass_with_tampered_token(self):
+    def test_auth_bypass_with_tampered_token(self, client):
         """Token modificado debe retornar 401."""
         # Registrar y login
         client.post(
@@ -243,7 +196,7 @@ class TestAuthBypass:
 class TestTokenExpiration:
     """Tests para verificar expiración de tokens."""
 
-    def test_access_token_has_expiration(self):
+    def test_access_token_has_expiration(self, client):
         """Access token debe tener claim de expiración."""
         from jose import jwt
         from app.core.config import settings
@@ -288,7 +241,7 @@ class TestTokenExpiration:
         except Exception:
             pytest.fail("Token should be decodable")
 
-    def test_refresh_token_rotation(self):
+    def test_refresh_token_rotation(self, client):
         """Refresh token debe funcionar y rotar."""
         # Registrar y login
         client.post(
@@ -324,7 +277,7 @@ class TestTokenExpiration:
 class TestCORSProtection:
     """Tests para verificar CORS protection."""
 
-    def test_cors_headers_present(self):
+    def test_cors_headers_present(self, client):
         """Verificar que headers CORS están presentes."""
         response = client.get("/api/v1/auth/me")
         
@@ -335,7 +288,7 @@ class TestCORSProtection:
 class TestPasswordSecurity:
     """Tests para verificar seguridad de contraseñas."""
 
-    def test_password_not_returned_in_response(self):
+    def test_password_not_returned_in_response(self, client):
         """Contraseña no debe retornarse en respuestas."""
         # Registrar
         response = client.post(
@@ -353,7 +306,7 @@ class TestPasswordSecurity:
         # Verificar que password no está en la respuesta
         assert "password" not in str(response_data)
 
-    def test_password_not_returned_on_login(self):
+    def test_password_not_returned_on_login(self, client):
         """Contraseña no debe retornarse en login response."""
         # Registrar y login
         client.post(

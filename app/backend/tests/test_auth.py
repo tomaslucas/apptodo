@@ -1,44 +1,10 @@
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from app.main import app
-from app.core.database import Base, get_db
-from app.models.user import User
-from app.models.task import Task, Category, TaskCategory, RefreshToken, TaskEvent, IdempotencyKey
-
-
-# Crear base de datos en memoria para testing
-SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
-
-engine = create_engine(
-    SQLALCHEMY_TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-client = TestClient(app)
 
 
 class TestAuthRegister:
     """Tests para el endpoint de registro."""
 
-    def test_register_success(self):
+    def test_register_success(self, client):
         """Registrar usuario correctamente."""
         response = client.post(
             "/api/v1/auth/register",
@@ -53,7 +19,7 @@ class TestAuthRegister:
         assert response.json()["data"]["user"]["username"] == "testuser"
         assert response.json()["data"]["user"]["email"] == "test@example.com"
 
-    def test_register_duplicate_email(self):
+    def test_register_duplicate_email(self, client):
         """No permitir email duplicado."""
         client.post(
             "/api/v1/auth/register",
@@ -63,7 +29,7 @@ class TestAuthRegister:
                 "password": "SecurePass123"
             }
         )
-        
+
         response = client.post(
             "/api/v1/auth/register",
             json={
@@ -75,7 +41,7 @@ class TestAuthRegister:
         assert response.status_code == 400
         assert "Email ya registrado" in response.json()["detail"]
 
-    def test_register_duplicate_username(self):
+    def test_register_duplicate_username(self, client):
         """No permitir username duplicado."""
         client.post(
             "/api/v1/auth/register",
@@ -85,7 +51,7 @@ class TestAuthRegister:
                 "password": "SecurePass123"
             }
         )
-        
+
         response = client.post(
             "/api/v1/auth/register",
             json={
@@ -97,7 +63,7 @@ class TestAuthRegister:
         assert response.status_code == 400
         assert "Username ya utilizado" in response.json()["detail"]
 
-    def test_register_invalid_password(self):
+    def test_register_invalid_password(self, client):
         """Contraseña inválida."""
         response = client.post(
             "/api/v1/auth/register",
@@ -109,7 +75,7 @@ class TestAuthRegister:
         )
         assert response.status_code == 422  # Validation error
 
-    def test_register_password_no_uppercase(self):
+    def test_register_password_no_uppercase(self, client):
         """Contraseña sin mayúsculas."""
         response = client.post(
             "/api/v1/auth/register",
@@ -121,7 +87,7 @@ class TestAuthRegister:
         )
         assert response.status_code == 422
 
-    def test_register_password_no_number(self):
+    def test_register_password_no_number(self, client):
         """Contraseña sin números."""
         response = client.post(
             "/api/v1/auth/register",
@@ -133,7 +99,7 @@ class TestAuthRegister:
         )
         assert response.status_code == 422
 
-    def test_register_invalid_email(self):
+    def test_register_invalid_email(self, client):
         """Email inválido."""
         response = client.post(
             "/api/v1/auth/register",
@@ -145,7 +111,7 @@ class TestAuthRegister:
         )
         assert response.status_code == 422
 
-    def test_register_invalid_username(self):
+    def test_register_invalid_username(self, client):
         """Username con caracteres inválidos."""
         response = client.post(
             "/api/v1/auth/register",
