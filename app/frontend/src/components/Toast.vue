@@ -1,8 +1,14 @@
 <template>
   <Transition name="toast" @enter="onEnter" @leave="onLeave">
-    <div v-if="isVisible" :class="containerClass">
+    <div 
+      v-if="isVisible"
+      :class="containerClass"
+      :role="toastRole"
+      :aria-live="ariaLive"
+      :aria-atomic="true"
+    >
       <div :class="contentClass">
-        <div :class="iconClass">
+        <div :class="iconClass" aria-hidden="true">
           <component :is="iconComponent"></component>
         </div>
         <div class="flex-1">
@@ -14,6 +20,7 @@
           :class="closeButtonClass"
           @click="close"
           aria-label="Close notification"
+          type="button"
         >
           ×
         </button>
@@ -86,8 +93,16 @@ const closeButtonClass = computed(() => {
   return `
     flex-shrink-0 text-gray-400 hover:text-gray-600
     transition-colors duration-200
-    text-xl leading-none
+    text-xl leading-none focus:outline-none focus:ring-2 focus:ring-offset-2
   `.trim().replace(/\s+/g, ' ')
+})
+
+const toastRole = computed(() => {
+  return props.type === 'error' ? 'alert' : 'status'
+})
+
+const ariaLive = computed(() => {
+  return props.type === 'error' ? 'assertive' : 'polite'
 })
 
 const iconComponent = computed(() => {

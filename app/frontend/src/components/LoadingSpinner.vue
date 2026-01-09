@@ -1,6 +1,11 @@
 <template>
-  <div :class="containerClass">
-    <div :class="spinnerClass"></div>
+  <div 
+    :class="containerClass"
+    role="status"
+    :aria-busy="true"
+    :aria-label="label || 'Loading'"
+  >
+    <div :class="spinnerClass" aria-hidden="true"></div>
     <p v-if="label" :class="labelClass">{{ label }}</p>
   </div>
 </template>
