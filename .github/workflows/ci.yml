@@ -20,14 +20,15 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install UV
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
 
       - name: Install dependencies
         working-directory: app/backend
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          uv sync --extra dev
+        run: uv sync --extra dev
 
       - name: Run linting
         working-directory: app/backend

@@ -1,7 +1,6 @@
 from pathlib import Path
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 from app.core.config import settings
 
 # Importar todos los modelos para registrarlos con Base

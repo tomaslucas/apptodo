@@ -10,6 +10,8 @@ export interface Task {
   priority: 'baja' | 'media' | 'alta'
   deadline?: string
   categories?: string[]
+  category_ids?: number[]
+  version?: number
   created_at: string
   updated_at: string
 }
@@ -118,7 +120,7 @@ export const useTaskStore = defineStore('task', () => {
   }
 
   const setFilter = (filterKey: string, value: any) => {
-    // @ts-ignore
+    // @ts-expect-error - Dynamic filter key assignment
     filters.value[filterKey as keyof typeof filters.value] = value as any
   }
 

@@ -34,6 +34,9 @@ bun run dev
 
 ### Opción 2: Docker (Alternativa)
 
+> [!NOTE]
+> Si deseas migrar tu entorno actual de Docker a Setup Nativo, consulta la [Guía de Migración](DOCKER_MIGRATION.md).
+
 ```bash
 docker-compose up
 ```
