@@ -9,6 +9,7 @@ from sqlalchemy import (
     Index,
     JSON,
 )
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.user import Base
 
@@ -37,6 +38,8 @@ class Task(Base):
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
+
+    categories = relationship("Category", secondary="task_categories", backref="tasks")
 
     # Índices
     __table_args__ = (

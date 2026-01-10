@@ -402,7 +402,7 @@ const availableCategories = computed(() => {
 // Get selected category details for displaying tags
 const selectedCategoryNames = computed(() => {
   return formData.value.categories
-    .map(id => categoryStore.categories.find(c => c.id === id))
+    .map(id => categoryStore.categories.find(c => String(c.id) === String(id)))
     .filter((c): c is NonNullable<typeof c> => c !== undefined)
 })
 

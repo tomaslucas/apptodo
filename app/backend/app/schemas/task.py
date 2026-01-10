@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, date
 from typing import Optional
 from enum import Enum
@@ -29,7 +29,9 @@ class TaskCreateRequest(BaseModel):
     deadline: Optional[date] = None
     status: Optional[StatusEnum] = StatusEnum.pendiente
     recurrence_rule: Optional[str] = None
-    category_ids: Optional[list[int]] = Field(None, description="Lista de IDs de categorías")
+    category_ids: Optional[list[int]] = Field(
+        None, description="Lista de IDs de categorías"
+    )
 
 
 class TaskUpdateRequest(BaseModel):
@@ -42,7 +44,9 @@ class TaskUpdateRequest(BaseModel):
     status: Optional[StatusEnum] = None
     recurrence_rule: Optional[str] = None
     version: Optional[int] = None  # Para optimistic locking
-    category_ids: Optional[list[int]] = Field(None, description="Lista de IDs de categorías")
+    category_ids: Optional[list[int]] = Field(
+        None, description="Lista de IDs de categorías"
+    )
 
 
 class TaskResponse(BaseModel):
@@ -61,6 +65,18 @@ class TaskResponse(BaseModel):
     version: int
     created_at: datetime
     updated_at: datetime
+    categories: list[int] = []
+
+    @field_validator("categories", mode="before")
+    @classmethod
+    def serialize_categories(cls, v):
+        if not v:
+            return []
+        # Check if it's already a list of ints or a single int
+        if isinstance(v, list) and len(v) > 0 and isinstance(v[0], int):
+            return v
+        # Handle SQLAlchemy relationship result
+        return [c.id for c in v]
 
     class Config:
         from_attributes = True

@@ -147,7 +147,13 @@ const updatePriority = () => {
 
 const setPriority = async (priority: string) => {
   showPriorityModal.value = false
-  const success = await taskStore.batchUpdate({ priority })
+  const priorityMap: Record<string, string> = {
+    low: 'baja',
+    medium: 'media',
+    high: 'alta'
+  }
+  const backendPriority = priorityMap[priority] || priority
+  const success = await taskStore.batchUpdate({ priority: backendPriority })
   if (success) {
     uiStore.addToast(`Updated priority for ${selectedCount.value} tasks`, 'success')
   } else {
@@ -161,7 +167,13 @@ const updateStatus = () => {
 
 const setStatus = async (status: string) => {
   showStatusModal.value = false
-  const success = await taskStore.batchUpdate({ status })
+  const statusMap: Record<string, string> = {
+    pending: 'pendiente',
+    in_progress: 'en_progreso',
+    completed: 'completada'
+  }
+  const backendStatus = statusMap[status] || status
+  const success = await taskStore.batchUpdate({ status: backendStatus })
   if (success) {
     uiStore.addToast(`Updated status for ${selectedCount.value} tasks`, 'success')
   } else {
