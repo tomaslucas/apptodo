@@ -45,12 +45,12 @@ def create_task(
             for category_id in request.category_ids:
                 TaskService.add_category_to_task(
                     db=db,
-                    task_id=task["id"],
+                    task_id=task.id,
                     user_id=current_user.id,
                     category_id=category_id,
                 )
             # Refrescar la tarea para incluir las categorías
-            task = TaskService.get_task(db, task["id"], current_user.id)
+            task = TaskService.get_task(db, task.id, current_user.id)
 
         return APIResponse(
             status="success", data={"task": task}, timestamp=datetime.utcnow()
