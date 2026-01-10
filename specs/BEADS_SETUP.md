@@ -14,14 +14,19 @@ bd init --prefix=nombre-proyecto --branch=beads-sync
 
 ### 2. **Configura el modo de trabajo recomendado**
 
-Para equipos y sincronización multi-máquina, **NO uses `no-db: true`**. Déjalo en modo database (por defecto):
+Para equipos y sincronización multi-máquina, **usa `no-db: false`** (modo database):
 
 ```bash
-# Verifica que no-db esté en false o comentado en .beads/config.yaml
+# Verifica la configuración en .beads/config.yaml
 cat .beads/config.yaml | grep "no-db"
+# Debería mostrar: no-db: false
 ```
 
-**Razón**: El modo `no-db: true` está pensado para desarrollo individual y puede causar conflictos de sincronización.
+**Razón**:
+- `no-db: true` está pensado para desarrollo individual y puede causar errores en `bd sync`
+- `no-db: false` permite sincronización fluida sin errores "import requires SQLite storage backend"
+- La base de datos local (`.beads/beads.db`) está en `.gitignore` y no se sube al repositorio
+- Cada máquina crea su propia DB local desde el `issues.jsonl` compartido
 
 ### 3. **Primer commit del proyecto**
 ```bash
@@ -76,16 +81,28 @@ sync-branch: "beads-sync"  # Mismo para todo el equipo
 ## Verificación en nueva máquina
 
 Cuando alguien clone por primera vez:
+
+### Con `no-db: false` (configuración recomendada para este proyecto)
 ```bash
 git clone <repo>
 cd <repo>
-bd stats  # Debería funcionar inmediatamente
+bd init --prefix=apptodo --branch=beads-sync  # Crear DB local desde issues.jsonl
+bd stats  # Ver todas las issues con su estado correcto
 ```
 
-Si necesitan crear issues:
+### Con `no-db: true` (modo JSONL solo)
+```bash
+git clone <repo>
+cd <repo>
+bd stats  # Funciona inmediatamente sin bd init
+```
+
+**Nota**: Este proyecto usa `no-db: false` para mejor experiencia de sincronización.
+
+### Para crear y sincronizar issues:
 ```bash
 bd create --title="..." --type=task --priority=2
-bd sync  # Sincronizar al terminar
+bd sync  # Sincronizar al terminar (funciona sin errores con no-db: false)
 ```
 
 ## Resumen de errores a evitar
