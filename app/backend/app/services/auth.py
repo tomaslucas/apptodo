@@ -22,7 +22,7 @@ class AuthService:
 
         # Crear usuario
         user = UserRepository.create_user(db, username, email, password)
-        return UserResponse.from_orm(user)
+        return UserResponse.model_validate(user)
 
     @staticmethod
     def authenticate_user(db: Session, email: str, password: str) -> Optional[Tuple]:
@@ -36,12 +36,12 @@ class AuthService:
         access_token = create_access_token({"sub": str(user.id)})
         refresh_token = create_refresh_token({"sub": str(user.id)})
 
-        return access_token, refresh_token, UserResponse.from_orm(user)
+        return access_token, refresh_token, UserResponse.model_validate(user)
 
     @staticmethod
     def get_user_from_token(db: Session, user_id: int) -> Optional[UserResponse]:
         """Obtener usuario del ID en token."""
         user = UserRepository.get_user_by_id(db, user_id)
         if user:
-            return UserResponse.from_orm(user)
+            return UserResponse.model_validate(user)
         return None

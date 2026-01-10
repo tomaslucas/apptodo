@@ -33,10 +33,12 @@ def register(request: UserRegisterRequest, db: Session = Depends(get_db)):
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.exception("Error en registro de usuario")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al registrar usuario",
+            detail=f"Error al registrar usuario: {type(e).__name__}",
         )
 
 
