@@ -16,6 +16,7 @@
     </div>
 
     <TaskForm modal-id="task-form" />
+    <CategoryModal modal-id="category" />
 
     <div
       v-if="taskStore.isLoading"
@@ -78,6 +79,7 @@ import FilterBar from './FilterBar.vue'
 import TaskItem from './TaskItem.vue'
 import TaskForm from './TaskForm.vue'
 import BatchActionsBar from './BatchActionsBar.vue'
+import CategoryModal from './CategoryModal.vue'
 
 const taskStore = useTaskStore()
 const categoryStore = useCategoryStore()
@@ -316,6 +318,7 @@ onMounted(async () => {
 
   // Register the task form modal
   uiStore.registerModal('task-form', 'task-form', false, '', {})
+  uiStore.registerModal('category', 'category', false, '', {})
 
   // Register and start shortcuts
   registerShortcuts()

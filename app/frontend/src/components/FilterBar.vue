@@ -35,13 +35,13 @@
           <option value="">
             All Priorities
           </option>
-          <option value="low">
+          <option value="baja">
             Low
           </option>
-          <option value="medium">
+          <option value="media">
             Medium
           </option>
-          <option value="high">
+          <option value="alta">
             High
           </option>
         </select>
@@ -208,7 +208,7 @@ const clearAllFilters = () => {
 .filter-group label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -220,6 +220,7 @@ const clearAllFilters = () => {
   border-radius: 4px;
   font-size: 0.9rem;
   background-color: white;
+  color: #1a1a1a;
   font-family: inherit;
   transition: all 0.2s;
 }

@@ -11,17 +11,10 @@ from app.models.user import Base
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # Para SQLite en desarrollo, usar StaticPool para evitar problemas con threading
-if "sqlite" in SQLALCHEMY_DATABASE_URL:
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-else:
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        pool_pre_ping=True,
-    )
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
