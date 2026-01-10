@@ -159,11 +159,12 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      const taskIds = Array.from(selectedTaskIds.value)
+      const taskIdStrings = Array.from(selectedTaskIds.value)
+      const taskIds = taskIdStrings.map((id) => parseInt(id, 10))
       const response = await apiClient.post('/api/v1/tasks/batch/complete', { task_ids: taskIds })
       
       // Update tasks in store
-      taskIds.forEach((taskId) => {
+      taskIdStrings.forEach((taskId) => {
         const index = tasks.value.findIndex((t) => t.id === taskId)
         if (index !== -1) {
           tasks.value[index].status = 'completada'
@@ -185,11 +186,12 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      const taskIds = Array.from(selectedTaskIds.value)
+      const taskIdStrings = Array.from(selectedTaskIds.value)
+      const taskIds = taskIdStrings.map((id) => parseInt(id, 10))
       await apiClient.post('/api/v1/tasks/batch/delete', { task_ids: taskIds })
       
       // Remove tasks from store
-      tasks.value = tasks.value.filter((t) => !taskIds.includes(t.id))
+      tasks.value = tasks.value.filter((t) => !taskIdStrings.includes(t.id))
       selectedTaskIds.value.clear()
       return true
     } catch (err) {
@@ -205,7 +207,7 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      const taskIds = Array.from(selectedTaskIds.value)
+      const taskIds = Array.from(selectedTaskIds.value).map((id) => parseInt(id, 10))
       const response = await apiClient.post('/api/v1/tasks/batch/restore', { task_ids: taskIds })
       
       // Refetch tasks to get the restored ones
@@ -225,11 +227,12 @@ export const useTaskStore = defineStore('task', () => {
     isLoading.value = true
     error.value = null
     try {
-      const taskIds = Array.from(selectedTaskIds.value)
+      const taskIdStrings = Array.from(selectedTaskIds.value)
+      const taskIds = taskIdStrings.map((id) => parseInt(id, 10))
       await apiClient.patch('/api/v1/tasks/batch/update', { task_ids: taskIds, ...updates })
       
       // Update tasks in store
-      taskIds.forEach((taskId) => {
+      taskIdStrings.forEach((taskId) => {
         const index = tasks.value.findIndex((t) => t.id === taskId)
         if (index !== -1) {
           if (updates.status) tasks.value[index].status = updates.status as any

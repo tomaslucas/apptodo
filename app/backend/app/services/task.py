@@ -251,6 +251,43 @@ class TaskService:
         return success
 
     @staticmethod
+    def sync_task_categories(
+        db: Session, task_id: int, user_id: int, category_ids: List[int]
+    ) -> bool:
+        """Sincronizar categorías de una tarea (reemplaza todas las categorías existentes)."""
+        # Verificar que la tarea pertenece al usuario
+        task = TaskRepository.get_task_by_id(db, task_id, user_id)
+        if not task:
+            return False
+
+        # Obtener categorías actuales
+        current_categories = TaskCategoryRepository.get_task_categories(db, task_id)
+        current_category_ids = {cat.id for cat in current_categories}
+        new_category_ids = set(category_ids)
+
+        # Remover categorías que ya no están
+        for cat_id in current_category_ids - new_category_ids:
+            TaskCategoryRepository.remove_category_from_task(db, task_id, cat_id)
+
+        # Agregar nuevas categorías
+        for cat_id in new_category_ids - current_category_ids:
+            # Verificar que la categoría pertenece al usuario
+            category = CategoryRepository.get_category_by_id(db, cat_id, user_id)
+            if category:
+                TaskCategoryRepository.add_category_to_task(db, task_id, cat_id)
+
+        # Registrar evento
+        TaskEventRepository.create_event(
+            db=db,
+            task_id=task_id,
+            user_id=user_id,
+            event_type="categories_synced",
+            payload={"category_ids": category_ids},
+        )
+
+        return True
+
+    @staticmethod
     def batch_complete_tasks(db: Session, task_ids: List[int], user_id: int) -> dict:
         """Marcar múltiples tareas como completadas."""
         updated_count = TaskRepository.batch_complete_tasks(db, task_ids, user_id)

@@ -29,6 +29,7 @@ class TaskCreateRequest(BaseModel):
     deadline: Optional[date] = None
     status: Optional[StatusEnum] = StatusEnum.pendiente
     recurrence_rule: Optional[str] = None
+    category_ids: Optional[list[int]] = Field(None, description="Lista de IDs de categorías")
 
 
 class TaskUpdateRequest(BaseModel):
@@ -41,6 +42,7 @@ class TaskUpdateRequest(BaseModel):
     status: Optional[StatusEnum] = None
     recurrence_rule: Optional[str] = None
     version: Optional[int] = None  # Para optimistic locking
+    category_ids: Optional[list[int]] = Field(None, description="Lista de IDs de categorías")
 
 
 class TaskResponse(BaseModel):

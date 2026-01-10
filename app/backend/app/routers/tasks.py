@@ -40,6 +40,18 @@ def create_task(
             recurrence_rule=request.recurrence_rule,
         )
 
+        # Agregar categorías si se especificaron
+        if request.category_ids:
+            for category_id in request.category_ids:
+                TaskService.add_category_to_task(
+                    db=db,
+                    task_id=task["id"],
+                    user_id=current_user.id,
+                    category_id=category_id,
+                )
+            # Refrescar la tarea para incluir las categorías
+            task = TaskService.get_task(db, task["id"], current_user.id)
+
         return APIResponse(
             status="success", data={"task": task}, timestamp=datetime.utcnow()
         )
@@ -187,6 +199,17 @@ def patch_task(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
             )
+
+        # Actualizar categorías si se especificaron
+        if request.category_ids is not None:
+            TaskService.sync_task_categories(
+                db=db,
+                task_id=task_id,
+                user_id=current_user.id,
+                category_ids=request.category_ids,
+            )
+            # Refrescar la tarea para incluir las categorías actualizadas
+            task = TaskService.get_task(db, task_id, current_user.id)
 
         return APIResponse(
             status="success", data={"task": task}, timestamp=datetime.utcnow()

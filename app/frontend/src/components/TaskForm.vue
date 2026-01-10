@@ -495,7 +495,7 @@ const submitForm = async () => {
         description: formData.value.description,
         priority: formData.value.priority,
         deadline: formData.value.deadline,
-        categories: formData.value.categories,
+        category_ids: formData.value.categories.map((c: string) => parseInt(c, 10)),
         status: formData.value.status,
       } as Partial<Task>)
       uiStore.addToast('Task updated successfully', 'success')
@@ -507,7 +507,8 @@ const submitForm = async () => {
         priority: formData.value.priority,
         deadline: formData.value.deadline || undefined,
         status: formData.value.status,
-      } as Omit<Task, 'id'>)
+        category_ids: formData.value.categories.map((c: string) => parseInt(c, 10)),
+      } as any)
       uiStore.addToast('Task created successfully', 'success')
     }
 
