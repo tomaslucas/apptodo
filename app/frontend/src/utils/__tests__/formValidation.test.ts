@@ -226,7 +226,7 @@ describe('Form Validation Utils', () => {
       const priorityRules = taskValidationRules.priority
 
       expect(validateField('', priorityRules)).toBeTruthy() // Required
-      expect(validateField('low', priorityRules)).toBeNull() // Valid
+      expect(validateField('baja', priorityRules)).toBeNull() // Valid
       expect(validateField('critical', priorityRules)).toBeTruthy() // Invalid value
     })
 
@@ -234,7 +234,7 @@ describe('Form Validation Utils', () => {
       const statusRules = taskValidationRules.status
 
       expect(validateField('', statusRules)).toBeTruthy() // Required
-      expect(validateField('completed', statusRules)).toBeNull() // Valid
+      expect(validateField('completada', statusRules)).toBeNull() // Valid
       expect(validateField('done', statusRules)).toBeTruthy() // Invalid value
     })
 
@@ -266,10 +266,10 @@ describe('Form Validation Utils', () => {
       const validTask = {
         title: 'My Task',
         description: 'A description',
-        priority: 'high',
+        priority: 'alta',
         deadline: '2027-12-25',
         categories: ['cat1'],
-        status: 'pending',
+        status: 'pendiente',
       }
 
       const errors = validateForm(validTask, taskValidationRules)
