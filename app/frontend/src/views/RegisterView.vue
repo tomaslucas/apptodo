@@ -117,8 +117,8 @@ const emailError = computed(() => {
   if (!emailRegex.test(email.value)) {
     return 'Invalid email format'
   }
-  // Reject reserved domains
-  const reservedDomains = ['test.test', 'example.com', 'test', 'localhost']
+  // Reject reserved domains (only obvious invalid ones)
+  const reservedDomains = ['test.test', 'test', 'localhost']
   const domain = email.value.split('@')[1]?.toLowerCase()
   if (domain && reservedDomains.includes(domain)) {
     return 'Please use a real email domain (e.g., gmail.com, yahoo.com)'
