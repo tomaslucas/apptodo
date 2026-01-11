@@ -252,6 +252,19 @@ const selectCategory = async (categoryId: string) => {
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.category-input::placeholder {
+  color: #888;
+}
+
+.category-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .btn-add-category {

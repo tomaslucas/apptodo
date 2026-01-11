@@ -56,6 +56,21 @@ class ShortcutsManager {
     const key = this.getNormalizedKey(event)
     this.pressedKeys.add(key)
 
+    // Skip shortcuts when user is typing in an input, textarea, or contenteditable
+    const target = event.target as HTMLElement
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable
+    ) {
+      // Only allow shortcuts with modifier keys (Ctrl, Meta, Alt) when in input fields
+      const hasModifier = event.ctrlKey || event.metaKey || event.altKey
+      if (!hasModifier) {
+        return
+      }
+    }
+
     // Check all shortcuts
     for (const shortcut of this.shortcuts.values()) {
       if (!shortcut.enabled) continue

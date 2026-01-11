@@ -527,12 +527,14 @@ watch(
     if (data && data.task) {
       isEditMode.value = true
       currentTaskId.value = data.task.id
+      // Convert category IDs to strings for checkbox compatibility
+      const categoryIds = (data.task.categories || []).map((id: string | number) => String(id))
       setFormData({
         title: data.task.title,
         description: data.task.description || '',
         priority: data.task.priority,
         deadline: data.task.deadline || '',
-        categories: data.task.categories || [],
+        categories: categoryIds,
         status: data.task.status,
       })
     } else if (data && data.taskId) {
@@ -541,12 +543,14 @@ watch(
       if (task) {
         isEditMode.value = true
         currentTaskId.value = task.id
+        // Convert category IDs to strings for checkbox compatibility
+        const categoryIds = (task.categories || []).map((id: string | number) => String(id))
         setFormData({
           title: task.title,
           description: task.description || '',
           priority: task.priority,
           deadline: task.deadline || '',
-          categories: task.categories || [],
+          categories: categoryIds,
           status: task.status,
         })
       }
