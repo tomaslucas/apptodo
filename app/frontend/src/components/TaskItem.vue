@@ -1,5 +1,5 @@
 <template>
-  <div :class="['task-item', { completed: task.status === 'completada', selected: isSelected }]">
+  <div :class="['task-item', `priority-border-${task.priority}`, { completed: task.status === 'completada', selected: isSelected }]">
     <div class="task-selection-column">
       <input
         type="checkbox"
@@ -290,6 +290,19 @@ const deleteTask = () => {
   background-color: #fff5f5;
   color: #c53030;
   border: 1px solid #fed7d7;
+}
+
+/* Priority left border for task cards */
+.priority-border-baja {
+  border-left: 4px solid #48bb78;
+}
+
+.priority-border-media {
+  border-left: 4px solid #ecc94b;
+}
+
+.priority-border-alta {
+  border-left: 4px solid #f56565;
 }
 
 .status-pending {
