@@ -38,30 +38,33 @@ Tu rama de trabajo (main, feature-x)
 
 ## Inicialización en proyecto nuevo
 
-### 1. Inicializa Beads ANTES de crear issues
+### 1. Inicializa Beads
 ```bash
 # En tu repositorio git ya inicializado
-bd init --prefix=nombre-proyecto --branch=beads-sync
+bd init --prefix=nombre-proyecto
 ```
 
-**Importante**: Usa un prefijo descriptivo del proyecto. No uses prefijos genéricos.
+**Notas**:
+- Si no especificas `--prefix`, usa el nombre del directorio actual
+- Usa un prefijo descriptivo del proyecto (ej: `apptodo`, `myapp`)
+- No uses prefijos genéricos como "test-"
 
-### 2. Configura el modo de trabajo recomendado
-
-Para sincronización multi-máquina, **usa `no-db: false`** (modo database):
-
+### 2. Configura sync-branch (IMPORTANTE)
 ```bash
-# Verifica la configuración
-cat .beads/config.yaml | grep "no-db"
-# Debería mostrar: no-db: false (o no aparecer, que es el default)
+# Crear rama dedicada para beads
+git branch beads-sync main
+git push -u origin beads-sync
+
+# Configurar beads para usar esa rama
+bd config set sync.branch beads-sync
 ```
 
-**Razón**:
-- `no-db: true` causa errores en `bd sync`
-- `no-db: false` permite sincronización fluida
-- La DB local está en `.gitignore` y no se sube
+**¿Por qué sync-branch?**
+- Beads usa git worktrees para sincronizar sin cambiar tu rama de trabajo
+- Si apuntas a tu rama actual (ej: main), git no puede crear worktree
+- La rama `beads-sync` es exclusiva para los JSONL de beads
 
-### 3. Primer commit
+### 3. Primer commit de configuración
 ```bash
 git add .beads/
 git commit -m "chore: Initialize Beads issue tracker"
@@ -73,11 +76,16 @@ git push origin main
 bd sync
 ```
 
-Esto crea la rama `beads-sync` y la sube al remoto.
+Esto:
+- Crea el worktree en `.git/beads-worktrees/beads-sync`
+- Exporta las issues a `beads-sync`
+- Crea el `sync_base.jsonl` para futuros 3-way merges
 
 ### 5. Verifica
 ```bash
 bd doctor
+bd config list | grep sync   # Debe mostrar sync.branch = beads-sync
+git worktree list            # Debe mostrar el worktree de beads-sync
 ```
 
 ---
