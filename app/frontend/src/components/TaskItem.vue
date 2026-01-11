@@ -36,7 +36,7 @@
         </div>
         <div class="task-badges">
           <span :class="['priority-badge', `priority-${task.priority}`]">{{ formatLabel(task.priority) }}</span>
-          <span :class="['status-badge', `status-${task.status}`]">{{ formatLabel(task.status) }}</span>
+          <span :class="['status-badge', `status-${task.status}`]">{{ getStatusIcon(task.status) }} {{ formatLabel(task.status) }}</span>
         </div>
       </div>
 
@@ -118,6 +118,15 @@ const formatLabel = (text: string): string => {
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
+}
+
+const getStatusIcon = (status: string): string => {
+  const icons: Record<string, string> = {
+    pendiente: '⏳',
+    en_progreso: '🔵',
+    completada: '✅',
+  }
+  return icons[status] || ''
 }
 
 const formatDeadline = (deadline: string): string => {
