@@ -6,7 +6,7 @@
         class="task-select-checkbox"
         :checked="isSelected"
         data-testid="task-select-checkbox"
-        title="Select for batch actions"
+        title="Seleccionar para acciones en lote"
         @change="toggleSelection"
       >
     </div>
