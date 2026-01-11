@@ -49,18 +49,6 @@
           >
             {{ getCategoryName(categoryId) }}
           </span>
-          <button
-            v-if="showActions"
-            class="btn-add-category"
-            title="Add category"
-            @click="openCategoryModal"
-          >
-            <span class="plus-icon">+</span>
-            <span
-              v-if="!(task.categories && task.categories.length > 0)"
-              class="btn-text"
-            >Add Category</span>
-          </button>
         </div>
 
         <div
@@ -172,9 +160,7 @@ const deleteTask = () => {
   }
 }
 
-const openCategoryModal = () => {
-  uiStore.openModal('category', 'Add Category', { taskId: props.task.id })
-}
+
 </script>
 
 <style scoped>
