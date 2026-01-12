@@ -102,11 +102,25 @@ uv python install 3.12
 
 # Sync backend dependencies
 cd app/backend && uv sync --python 3.12
-source .venv/bin/activate
 
 # Sync frontend dependencies (uses Bun, not UV)
 cd app/frontend && bun install
 ```
+
+## Development Server
+
+```bash
+./dev.sh start           # Start frontend + backend
+./dev.sh start backend   # Start only backend
+./dev.sh start frontend  # Start only frontend
+./dev.sh stop            # Stop all services
+./dev.sh status          # Check service status
+./dev.sh logs            # View logs (Ctrl+C to exit)
+```
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
 ## Files
 

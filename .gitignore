@@ -69,6 +69,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# dev.sh files
+.backend.log
+.frontend.log
+.backend.pid
+.frontend.pid
+
 # Testing
 .coverage
 htmlcov/

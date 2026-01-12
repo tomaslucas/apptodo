@@ -10,21 +10,15 @@ Aplicación web de gestión de tareas con autenticación, filtros dinámicos y a
 
 ## Setup Rápido
 
-### Opción 1: Desarrollo Nativo (Recomendado)
-
-**Backend:**
 ```bash
-cd app/backend
-uv sync --python 3.12
-source .venv/bin/activate
-uvicorn app.main:app --reload --port 8000
-```
+# Instalar dependencias (solo primera vez)
+cd app/backend && uv sync --python 3.12
+cd app/frontend && bun install
 
-**Frontend:**
-```bash
-cd app/frontend
-bun install
-bun run dev
+# Iniciar servicios
+./dev.sh start        # Frontend + Backend
+./dev.sh stop         # Parar todo
+./dev.sh status       # Ver estado
 ```
 
 **Acceso:**
@@ -32,7 +26,7 @@ bun run dev
 - Backend API: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 
-### Opción 2: Docker (Alternativa)
+### Docker (Alternativa)
 
 > [!NOTE]
 > Si deseas migrar tu entorno actual de Docker a Setup Nativo, consulta la [Guía de Migración](DOCKER_MIGRATION.md).
