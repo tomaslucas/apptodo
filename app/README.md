@@ -53,7 +53,7 @@ bun install
 bun run dev
 ```
 
-App disponible en: `http://localhost:5173`
+App disponible en: `http://localhost:3000`
 
 ## Documentación
 
@@ -72,9 +72,9 @@ App disponible en: `http://localhost:5173`
 ## Fases de Implementación
 
 1. ✅ Setup inicial: Python + FastAPI + SQLite
-2. ⬜ Backend base: auth, CRUD básico de tareas
-3. ⬜ Backend avanzado: filtros, categorías, batch operations
-4. ⬜ Frontend base: Vue setup, router, login
-5. ⬜ Frontend features: tareas, filtros, UI
-6. ⬜ Atajos de teclado
-7. ⬜ Polish y optimizaciones
+2. ✅ Backend base: auth, CRUD básico de tareas
+3. ✅ Backend avanzado: filtros, categorías, batch operations
+4. ✅ Frontend base: Vue setup, router, login
+5. ✅ Frontend features: tareas, filtros, UI
+6. ✅ Atajos de teclado
+7. 🔄 Polish y optimizaciones (en progreso)
