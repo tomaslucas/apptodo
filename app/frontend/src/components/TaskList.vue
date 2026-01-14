@@ -105,7 +105,7 @@ const createNewTask = () => {
 const editTask = (taskId: string) => {
   const task = taskStore.tasks.find((t) => t.id === taskId)
   if (task) {
-    uiStore.openModal('task-form', 'Edit Task', { task })
+    uiStore.openModal('task-form', 'Edit Task', { taskId, task })
   }
 }
 

@@ -492,9 +492,9 @@ const submitForm = async () => {
       // Update existing task
       await taskStore.updateTask(currentTaskId.value, {
         title: formData.value.title,
-        description: formData.value.description,
+        description: formData.value.description || undefined,
         priority: formData.value.priority,
-        deadline: formData.value.deadline,
+        deadline: formData.value.deadline || undefined,
         category_ids: formData.value.categories.map((c: string) => parseInt(c, 10)),
         status: formData.value.status,
       } as Partial<Task>)

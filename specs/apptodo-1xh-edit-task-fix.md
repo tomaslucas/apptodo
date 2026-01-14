@@ -1,8 +1,10 @@
 # Investigation & Fix Plan: apptodo-1xh
 
 **Issue:** Edit task via pencil icon does not save changes  
-**Status:** Investigation Complete  
-**Date:** 2026-01-14
+**Status:** ✅ FIXED AND VERIFIED  
+**Date:** 2026-01-14  
+**Fixed By:** Amp Agent  
+**Fixes Applied:** 3 changes across 3 files
 
 ---
 
@@ -254,7 +256,7 @@ Looking at how the task object is structured:
 
 ## 3. Fix Plan
 
-### Fix 1: Remove Duplicate Modal Open (Primary Fix)
+### Fix 1: Remove Duplicate Modal Open (Primary Fix) ✅ IMPLEMENTED
 
 **File:** [`TaskItem.vue`](file:///home/tlucas/code/apptodo/app/frontend/src/components/TaskItem.vue)  
 **Lines:** 125-128
@@ -296,7 +298,7 @@ Remove the `@edit` handler since TaskItem already opens the modal:
 
 **Recommended Approach:** Fix in TaskItem.vue - remove the `uiStore.openModal` call, let TaskList handle modal opening consistently. This keeps the responsibility in one place (TaskList).
 
-### Fix 2: Ensure Consistent Modal Data (Secondary)
+### Fix 2: Ensure Consistent Modal Data (Secondary) ✅ IMPLEMENTED
 
 **File:** [`TaskList.vue`](file:///home/tlucas/code/apptodo/app/frontend/src/components/TaskList.vue)  
 **Lines:** 105-109
@@ -323,7 +325,38 @@ const editTask = (taskId: string) => {
 }
 ```
 
-### Fix 3: Verify Category Data Flow (Potential Issue)
+### Fix 3: Handle Empty Optional Fields in Update Mode ✅ IMPLEMENTED (DISCOVERED DURING TESTING)
+
+**Issue Discovered:** During testing, the edit submission returned a 422 error. Investigation revealed that in update mode, empty strings for `description` and `deadline` were being sent to the backend, which expects `null`/`None` for optional date fields.
+
+**File:** [`TaskForm.vue`](file:///home/tlucas/code/apptodo/app/frontend/src/components/TaskForm.vue)  
+**Lines:** 491-500
+
+**Problem Code:**
+```javascript
+await taskStore.updateTask(currentTaskId.value, {
+  title: formData.value.title,
+  description: formData.value.description,  // Empty string sent
+  priority: formData.value.priority,
+  deadline: formData.value.deadline,  // Empty string sent - causes 422!
+  // ...
+})
+```
+
+**Fixed Code:**
+```javascript
+await taskStore.updateTask(currentTaskId.value, {
+  title: formData.value.title,
+  description: formData.value.description || undefined,  // Convert empty to undefined
+  priority: formData.value.priority,
+  deadline: formData.value.deadline || undefined,  // Convert empty to undefined
+  // ...
+})
+```
+
+**Root Cause:** The backend Pydantic schema for `TaskUpdateRequest` expects `Optional[date]` for the deadline field. An empty string cannot be parsed as a date, causing a 422 Unprocessable Entity error.
+
+### Fix 4: Verify Category Data Flow (Potential Issue)
 
 Check that when a task is fetched/created, the `categories` array is properly populated in the store.
 

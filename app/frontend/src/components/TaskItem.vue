@@ -124,7 +124,6 @@ const getCategoryName = (categoryId: string): string => {
 
 const editTask = () => {
   emit('edit', props.task.id)
-  uiStore.openModal('task-form', 'Edit Task', { taskId: props.task.id, task: props.task })
 }
 
 const deleteTask = () => {
