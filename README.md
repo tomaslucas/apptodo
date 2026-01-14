@@ -1,6 +1,12 @@
 # AppTodo - Aplicación de Tareas
 
-Aplicación web de gestión de tareas con autenticación, filtros dinámicos y atajos de teclado.
+**Nota IMPORTANTE**
+
+> Esta es una aplicación de juguete hecha con agentes para practicar y aprender creándola.
+> No usar en producción. No se admiten colaboraciones ni cambios.
+> Úsala bajo tu responsabilidad. 
+
+Aplicación web de gestión de tareas con autenticación.
 
 ## Stack Técnico
 
@@ -40,8 +46,7 @@ docker-compose up
 ### Backend
 ```bash
 cd app/backend
-source .venv/bin/activate
-pytest
+uv run pytest
 ```
 
 ### Frontend

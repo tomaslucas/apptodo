@@ -11,7 +11,7 @@
 #
 # Servicios:
 #   all      - Frontend + Backend (default)
-#   frontend - Solo frontend (puerto 5173)
+#   frontend - Solo frontend (puerto 3000)
 #   backend  - Solo backend (puerto 8000)
 #
 # Ejemplos:
@@ -42,7 +42,7 @@ is_running() {
     local pid_file=$1
     if [ -f "$pid_file" ]; then
         local pid=$(cat "$pid_file")
-        if ps -p "$pid" > /dev/null 2>&1; then
+        if [ -d "/proc/$pid" ]; then
             return 0
         fi
     fi
@@ -63,8 +63,7 @@ start_backend() {
         uv sync --python 3.12
     fi
     
-    source .venv/bin/activate
-    nohup uvicorn app.main:app --reload --port 8000 > "$SCRIPT_DIR/.backend.log" 2>&1 &
+    nohup uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 > "$SCRIPT_DIR/.backend.log" 2>&1 &
     echo $! > "$BACKEND_PID_FILE"
     
     sleep 2
@@ -95,7 +94,7 @@ start_frontend() {
     
     sleep 3
     if is_running "$FRONTEND_PID_FILE"; then
-        log_success "Frontend iniciado en http://localhost:5173 (PID: $(cat $FRONTEND_PID_FILE))"
+        log_success "Frontend iniciado en http://localhost:3000 (PID: $(cat $FRONTEND_PID_FILE))"
     else
         log_error "Error al iniciar frontend. Ver .frontend.log"
         return 1
@@ -113,14 +112,14 @@ stop_service() {
         
         # Esperar a que termine
         for i in {1..10}; do
-            if ! ps -p "$pid" > /dev/null 2>&1; then
+            if [ ! -d "/proc/$pid" ]; then
                 break
             fi
             sleep 0.5
         done
         
         # Force kill si sigue vivo
-        if ps -p "$pid" > /dev/null 2>&1; then
+        if [ -d "/proc/$pid" ]; then
             kill -9 "$pid" 2>/dev/null || true
         fi
         
@@ -152,7 +151,7 @@ show_status() {
     fi
     
     if is_running "$FRONTEND_PID_FILE"; then
-        echo -e "Frontend: ${GREEN}●${NC} Corriendo (PID: $(cat $FRONTEND_PID_FILE)) - http://localhost:5173"
+        echo -e "Frontend: ${GREEN}●${NC} Corriendo (PID: $(cat $FRONTEND_PID_FILE)) - http://localhost:3000"
     else
         echo -e "Frontend: ${RED}○${NC} Parado"
     fi

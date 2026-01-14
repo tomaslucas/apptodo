@@ -15,9 +15,6 @@ Backend FastAPI + SQLite para la aplicación de gestión de tareas.
 # Instalar dependencias con UV (crea .venv automáticamente)
 uv sync --python 3.12
 
-# Activar ambiente virtual
-source .venv/bin/activate
-
 # Configurar variables de entorno
 cp .env.example .env
 # Editar .env con valores reales
@@ -27,10 +24,10 @@ cp .env.example .env
 
 ```bash
 # Modo desarrollo
-uvicorn app.main:app --reload --port 8000
+uv run uvicorn app.main:app --reload --port 8000
 
 # Modo producción
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 La aplicación estará disponible en `http://localhost:8000`
@@ -78,12 +75,12 @@ app/
 ## Testing
 
 ```bash
-pytest tests/ -v
+uv run pytest tests/ -v
 ```
 
 ## Development
 
-Para cambios en requirements:
+Para añadir dependencias:
 ```bash
-pip freeze > requirements.txt
+uv add <package>
 ```
